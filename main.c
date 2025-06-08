@@ -58,7 +58,10 @@ int main(void)
     Vector2 mousePoint = { 0.0f, 0.0f };
 
     // Carga texturas
-    Texture2D fondo = LoadTexture("resources/fondo.png"); // Tu imagen de fondo
+    Image fondoImg = LoadImage("resources/fondo.png");
+    ImageFlipVertical(&fondoImg); // Invierte la imagen verticalmente
+    Texture2D fondo = LoadTextureFromImage(fondoImg);
+    UnloadImage(fondoImg);
     Texture2D imagen2D = LoadTexture("resources/yipeee!.png"); // Imagen central
 
     // Crea un plano 3D para el fondo
@@ -72,7 +75,7 @@ int main(void)
 
     // Cámara 3D
     Camera camera = { 0 };
-    camera.position = (Vector3){ 0.0f, 5.0f, 10.0f }; // Inicialmente lejos
+    camera.position = (Vector3){ 0.0f, 2.0f, 0.0f }; // Inicialmente lejos
     camera.target = (Vector3){ 0.0f, 0.0f, 0.0f };
     camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
     camera.fovy = 45.0f;
