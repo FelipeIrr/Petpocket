@@ -114,7 +114,7 @@ int main(void)
                 rlEnableBackfaceCulling();
                 DrawBillboard(camera, imagen2D, (Vector3){0,1,0}, 2.0f, WHITE);
                 DrawModel(fondoModel, (Vector3){0,0,0}, 1.0f, WHITE);
-                DrawModelEx(guitarra, (Vector3){2,1,0}, (Vector3){0,1,0}, 0.0f, (Vector3){1,2,1}, WHITE);
+                DrawModelEx(guitarra, (Vector3){3,1,0}, (Vector3){-4,4,1}, 45.0f, (Vector3){2,2,2}, WHITE);
             EndMode3D();
 
             // --- Dibuja la interfaz 2D (botones) ---
