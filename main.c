@@ -45,12 +45,12 @@ int main(void)
 
     // Define button bounds on screen
     Rectangle btnBounds[NUM_BUTTONS] = {
-        { 100, 100, (float)button.width, frameHeight }, // Botón 1 en (100, 100)
-        { 300, 200, (float)button.width, frameHeight }, // Botón 2 en (300, 200)
-        { 500, 300, (float)button.width, frameHeight }, // Botón 3 en (500, 300)
-        { 100, 200, (float)button.width, frameHeight }, // Botón 4 en (100, 200)
-        { 300, 300, (float)button.width, frameHeight }, // Botón 5 en (300, 300)
-        { 500, 100, (float)button.width, frameHeight }  // Botón 6 en (500, 100)
+        { 50, 500, (float)button.width, frameHeight }, // Botón 1 en (50, 500)
+        { 375, 500, (float)button.width, frameHeight }, // Botón 2 en (300, 200)
+        { 743, 500, (float)button.width, frameHeight }, // Botón 3 en (500, 300)
+        { 50, 376, (float)button.width, frameHeight }, // Botón 4 en (100, 200)
+        { 743, 376, (float)button.width, frameHeight }, // Botón 5 en (300, 300)
+        { 782, 39, (float)button.width, frameHeight }  // Botón 6 en (500, 100)
     };
     int btnState[NUM_BUTTONS] = { 0 };
     bool btnAction[NUM_BUTTONS] = { false };
@@ -108,7 +108,7 @@ int main(void)
         }
 
         // Actualiza la cámara para girar alrededor del centro
-        angle += 0.01f;
+        angle += 0.005f;
         camera.position.x = sinf(angle) * 10.0f;
         camera.position.z = cosf(angle) * 10.0f;
         //----------------------------------------------------------------------------------
@@ -118,19 +118,23 @@ int main(void)
         BeginDrawing();
 
             ClearBackground(RAYWHITE);
+
+            // --- Dibuja la escena 3D ---
+            BeginMode3D(camera);
+                rlDisableBackfaceCulling();
+                DrawModel(skyboxModel, (Vector3){0,0,0}, 1.0f, WHITE);
+                rlEnableBackfaceCulling();
+                DrawBillboard(camera, imagen2D, (Vector3){0,1,0}, 2.0f, WHITE);
+            EndMode3D();
+
+            // --- Dibuja la interfaz 2D (botones) ---
             for (int i = 0; i < NUM_BUTTONS; i++) {
                 sourceRec.y = btnState[i]*frameHeight;
                 DrawTextureRec(button, sourceRec, (Vector2){ btnBounds[i].x, btnBounds[i].y }, WHITE);
             }
 
-            BeginMode3D(camera);
-                rlDisableBackfaceCulling(); // Permite ver la textura desde dentro del cubo
-                DrawModel(skyboxModel, (Vector3){0,0,0}, 1.0f, WHITE);
-                rlEnableBackfaceCulling();  // Vuelve a activar el culling
-                DrawBillboard(camera, imagen2D, (Vector3){0,1,0}, 2.0f, WHITE);
-            EndMode3D();
-
             DrawText("Camara girando alrededor de la imagen 2D", 10, 10, 20, DARKGRAY);
+
         EndDrawing();
         //----------------------------------------------------------------------------------
     }
