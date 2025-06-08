@@ -53,6 +53,9 @@ int main(void)
     Model fondoModel = LoadModelFromMesh(GenMeshPlane(20, 20, 1, 1));
     fondoModel.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = fondo;
 
+    // Crea un modelo 3D para el ecenario
+    Model guitarra = LoadModel("resources/guitarra1.glb");
+
     // Reemplaza el plano por un skybox (cubo grande)
     Mesh skyboxMesh = GenMeshCube(100.0f, 100.0f, 100.0f); // Cubo grande
     Model skyboxModel = LoadModelFromMesh(skyboxMesh);
@@ -110,6 +113,8 @@ int main(void)
                 DrawModel(skyboxModel, (Vector3){0,0,0}, 1.0f, WHITE);
                 rlEnableBackfaceCulling();
                 DrawBillboard(camera, imagen2D, (Vector3){0,1,0}, 2.0f, WHITE);
+                DrawModel(fondoModel, (Vector3){0,0,0}, 1.0f, WHITE);
+                DrawModelEx(guitarra, (Vector3){2,1,0}, (Vector3){0,1,0}, 0.0f, (Vector3){1,2,1}, WHITE);
             EndMode3D();
 
             // --- Dibuja la interfaz 2D (botones) ---
