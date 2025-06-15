@@ -6,19 +6,19 @@
 #define NUM_FRAMES  3       // Number of frames (rectangles) for the button sprite texture
 #define NUM_BUTTONS 6
 
-<<<<<<< HEAD
-=======
 // 1. Enum para los menús
 typedef enum {
     MENU_PRINCIPAL,
+    MENU_TIENDA,
+    MENU_COMIDA,
     MENU_JUEGO,
-    MENU_CONFIG,
-    MENU_ACCESORIOS
+    MENU_ACCESORIOS,
+    MENU_LUGARES,
+    MENU_CONFIG
 } Pantalla;
 
 Pantalla pantallaActual = MENU_PRINCIPAL;
 
->>>>>>> main
 //------------------------------------------------------------------------------------
 // Program main entry point
 //------------------------------------------------------------------------------------
@@ -117,16 +117,9 @@ int main(void)
         // Draw
         //----------------------------------------------------------------------------------
         BeginDrawing();
-<<<<<<< HEAD
-
-            ClearBackground(RAYWHITE);
-
-            // --- Dibuja la escena 3D ---
-=======
             ClearBackground(RAYWHITE);
 
             // --- Escena 3D SIEMPRE visible ---
->>>>>>> main
             BeginMode3D(camera);
                 rlDisableBackfaceCulling();
                 DrawModel(skyboxModel, (Vector3){0,0,0}, 1.0f, WHITE);
@@ -136,12 +129,6 @@ int main(void)
                 DrawModelEx(guitarra, (Vector3){3,1,0}, (Vector3){-4,4,1}, 45.0f, (Vector3){2,2,2}, WHITE);
             EndMode3D();
 
-<<<<<<< HEAD
-            // --- Dibuja la interfaz 2D (botones) ---
-            for (int i = 0; i < NUM_BUTTONS; i++) {
-                sourceRec.y = btnState[i]*frameHeight;
-                DrawTextureRec(button, sourceRec, (Vector2){ btnBounds[i].x, btnBounds[i].y }, WHITE);
-=======
             // --- Interfaz 2D según menú ---
             if (pantallaActual == MENU_PRINCIPAL) {
                 DrawText("MENU PRINCIPAL", 20, 20, 30, DARKBLUE);
@@ -151,27 +138,44 @@ int main(void)
 
                     if (btnAction[i]) {
                         PlaySound(fxButton);
-                        if (i == 0) pantallaActual = MENU_JUEGO;        // Botón 1: Juego
-                        else if (i == 1) pantallaActual = MENU_CONFIG;   // Botón 2: Configuración
-                        else if (i == 2) pantallaActual = MENU_ACCESORIOS; // Botón 3: Accesorios
+                        if (i == 0) pantallaActual = MENU_COMIDA;        // Botón 1: COMIDA
+                        else if (i == 1) pantallaActual = MENU_JUEGO;   // Botón 2: JUEGO
+                        else if (i == 2) pantallaActual = MENU_LUGARES; // Botón 3: LUGARES
+                        else if (i == 3) pantallaActual = MENU_TIENDA;    // Botón 4: TIENDA
+                        else if (i == 4) pantallaActual = MENU_ACCESORIOS;    // Botón 5: ACCESORIOS
+                        else if (i == 5) pantallaActual = MENU_CONFIG;   // Botón 6: CONFIGURACION
                     }
                 }
             }
             else if (pantallaActual == MENU_JUEGO) {
                 DrawText("JUEGO", 20, 20, 30, DARKGREEN);
-                DrawText("Presiona ESC para volver", 20, 60, 20, GRAY);
-                if (IsKeyPressed(KEY_ESCAPE)) pantallaActual = MENU_PRINCIPAL;
+                DrawText("Presiona BACKSPACE para volver", 20, 60, 20, GRAY);
+                if (IsKeyPressed(KEY_BACKSPACE)) pantallaActual = MENU_PRINCIPAL;
             }
             else if (pantallaActual == MENU_CONFIG) {
                 DrawText("CONFIGURACION", 20, 20, 30, DARKGRAY);
-                DrawText("Presiona ESC para volver", 20, 60, 20, GRAY);
-                if (IsKeyPressed(KEY_ESCAPE)) pantallaActual = MENU_PRINCIPAL;
+                DrawText("Presiona BACKSPACE para volver", 20, 60, 20, GRAY);
+                if (IsKeyPressed(KEY_BACKSPACE)) pantallaActual = MENU_PRINCIPAL;
             }
             else if (pantallaActual == MENU_ACCESORIOS) {
                 DrawText("ACCESORIOS", 20, 20, 30, DARKPURPLE);
-                DrawText("Presiona ESC para volver", 20, 60, 20, GRAY);
-                if (IsKeyPressed(KEY_ESCAPE)) pantallaActual = MENU_PRINCIPAL;
->>>>>>> main
+                DrawText("Presiona BACKSPACE para volver", 20, 60, 20, GRAY);
+                if (IsKeyPressed(KEY_BACKSPACE)) pantallaActual = MENU_PRINCIPAL;
+            }
+            else if (pantallaActual == MENU_TIENDA) {
+                DrawText("TIENDA", 20, 20, 30, ORANGE);
+                DrawText("Presiona BACKSPACE para volver", 20, 60, 20, GRAY);
+                if (IsKeyPressed(KEY_BACKSPACE)) pantallaActual = MENU_PRINCIPAL;
+            }
+            else if (pantallaActual == MENU_COMIDA) {
+                DrawText("COMIDA", 20, 20, 30, DARKBROWN);
+                DrawText("Presiona BACKSPACE para volver", 20, 60, 20, GRAY);
+                if (IsKeyPressed(KEY_BACKSPACE)) pantallaActual = MENU_PRINCIPAL;
+            }
+            else if (pantallaActual == MENU_LUGARES) {
+                DrawText("LUGARES", 20, 20, 30, DARKGRAY);
+                DrawText("Presiona BACKSPACE para volver", 20, 60, 20, GRAY);
+                if (IsKeyPressed(KEY_BACKSPACE)) pantallaActual = MENU_PRINCIPAL;
             }
 
             DrawText("Camara girando alrededor de la imagen 2D", 10, 10, 20, DARKGRAY);
@@ -187,7 +191,6 @@ int main(void)
     UnloadTexture(fondo);
     UnloadTexture(imagen2D);
     UnloadModel(fondoModel);
-    // Al final, descarga el modelo del skybox
     UnloadModel(skyboxModel);
 
     CloseAudioDevice();     // Close audio device
