@@ -178,7 +178,7 @@ int main(void)
                 if (IsKeyPressed(KEY_BACKSPACE)) pantallaActual = MENU_PRINCIPAL;
             }
 
-            DrawText("Camara girando alrededor de la imagen 2D", 10, 10, 20, DARKGRAY);
+            DrawText("a", 10, 10, 20, DARKGRAY);
 
         EndDrawing();
         //----------------------------------------------------------------------------------
