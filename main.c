@@ -2,9 +2,9 @@
 #include "rlgl.h"
 #include "raymath.h"
 #include <math.h>
-//#include "tdas/list.h"
-//#include "tdas/map.h"
-//#include "tdas/array.h"
+#include "tdas/list.h"
+#include "tdas/map.h"
+#include "tdas/array.h"
  
 #define NUM_FRAMES  3       // Number of frames (rectangles) for the button sprite texture
 #define NUM_BUTTONS 6
@@ -21,6 +21,39 @@ typedef enum {
 } Pantalla;
 
 Pantalla pantallaActual = MENU_PRINCIPAL;
+
+typedef enum {
+    COMIDA,
+    ROPA
+} TipoItem;
+
+typedef struct Item {
+    char* nombre;         
+    TipoItem tipo;
+    int precio;
+    int valor_energetico;   // solo aplica si tipo == COMIDA
+    char* tipo_prenda;      // solo aplica si tipo == ROPA
+} Item;
+
+typedef struct Escenario {
+    char* nombreEscenario;
+    Texture2D imagen_fondo;
+    int req_energia;
+    int req_monedas;
+    Map* tienda; //Mapa para la tienda
+} Escenario;
+
+typedef struct Mascota {
+    char* nombre;
+    int energia;
+    int monedas;
+    Escenario* escenario_actual;
+    List* inventario; // ítems en inventario
+    Item* sombrero;
+    Item* camisa;
+    Item* pantalones;
+    Item* zapatos;
+} Mascota;
 
 //------------------------------------------------------------------------------------
 // Program main entry point
