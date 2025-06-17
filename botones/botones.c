@@ -16,8 +16,8 @@ typedef struct Item {
     char* nombre;         
     TipoItem tipo;
     int precio;
-    int valor_energetico;   // solo aplica si tipo == COMIDA
-    char* tipo_prenda;      // solo aplica si tipo == ROPA
+    int valor_energetico;   // solo aplica si tipo  COMIDA
+    char* tipo_prenda;      // solo aplica si tipo  ROPA
 } Item;
 
 typedef struct Escenario {
