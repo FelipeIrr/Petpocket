@@ -47,15 +47,21 @@ int main(void) {
     char feedbackText[32] = "";
     int feedbackTimer = 0;
 
-    float globalAngle = 0.0f; // Ángulo global para la rotación
+    float globalAngle = 0.0f; // Ángulo global para la rotación de la hitmark
+    float squareAngle = 0.0f; // Ángulo de rotación propio del cuadrado
+    int barEffectTimer = 0; // Efecto visual para la barra
 
     while (!WindowShouldClose()) {
         UpdateMusicStream(music);
         float t = GetMusicTimePlayed(music);
 
-        // Incrementa el ángulo global lentamente
-        globalAngle += 0.01f; // Ajusta la velocidad de rotación aquí
+        // Incrementa el ángulo global lentamente (hitmark)
+        globalAngle += 0.01f;
         if (globalAngle > 2*PI) globalAngle -= 2*PI;
+
+        // Incrementa el ángulo del cuadrado para que rote en su eje
+        squareAngle += 2.0f; // velocidad de giro del cuadrado (grados por frame)
+        if (squareAngle > 360.0f) squareAngle -= 360.0f;
 
         BeginDrawing();
         ClearBackground(BLACK);
@@ -69,15 +75,22 @@ int main(void) {
         float hitX = cx + cosf(hitAngle) * CIRCLE_RADIUS;
         float hitY = cy + sinf(hitAngle) * CIRCLE_RADIUS;
 
-        // Dibuja la barra de ritmo (en la posición de la zona de impacto)
+        // Tamaño y color del cuadrado según efecto
+        float baseSize = NOTE_SIZE * 2;
+        float squareSize = baseSize + (barEffectTimer > 0 ? NOTE_SIZE * 1.5f : 0);
+        Color squareColor = (barEffectTimer > 0) ? GREEN : YELLOW;
+
+        if (barEffectTimer > 0) barEffectTimer--;
+
+        // Dibuja el cuadrado centrado y rotado en su propio eje en la zona de impacto
         DrawRectanglePro(
-            (Rectangle){ hitX - 5, hitY - 60, 10, 120 },
-            (Vector2){ 5, 60 },
-            hitAngle * 180.0f / PI + 90, // Convierte a grados y ajusta orientación
-            YELLOW
+            (Rectangle){ hitX, hitY, squareSize, squareSize },
+            (Vector2){ squareSize/2, squareSize/2 },
+            squareAngle,
+            squareColor
         );
 
-        // Dibuja la zona de impacto
+        // Dibuja la zona de impacto (círculo gris)
         DrawCircle((int)hitX, (int)hitY, NOTE_SIZE, GRAY);
         DrawText("PRESIONA SPACE", SCREEN_WIDTH/2 - 80, 40, 20, RAYWHITE);
 
@@ -87,18 +100,16 @@ int main(void) {
             if (beatMap[i].hit) continue;
 
             float dt = t - beatMap[i].time;
-            // Las notas se acercan a la zona de impacto siguiendo el círculo
-            float noteAngle = globalAngle - dt * 0.8f; // 0.8f ajusta la velocidad de llegada
+            float noteAngle = globalAngle - dt * 1.7f;
             float noteX = cx + cosf(noteAngle) * CIRCLE_RADIUS;
             float noteY = cy + sinf(noteAngle) * CIRCLE_RADIUS;
 
-            // Solo dibuja si está cerca del círculo
             if (dt < -2.0f || dt > 2.0f) continue;
 
             DrawCircle((int)noteX, (int)noteY, NOTE_SIZE, BLUE);
 
             float diff = fabsf(noteAngle - hitAngle);
-            if (diff > PI) diff = 2*PI - diff; // Corrige diferencia angular
+            if (diff > PI) diff = 2*PI - diff;
 
             if (diff < HIT_THRESHOLD) noteInRange = true;
             if (IsKeyPressed(KEY_SPACE)) {
@@ -107,10 +118,10 @@ int main(void) {
                     score += (diff < 0.05f ? 300 : 100);
                     strcpy(feedbackText, diff < 0.05f ? "EXCELENTE!" : "Bien!");
                     feedbackTimer = 30;
+                    barEffectTimer = 10; // Activa el efecto reactivo (tamaño)
                 }
             }
 
-            // Si la nota ya pasó la zona de impacto y no fue tocada
             if (dt > 0.2f && !beatMap[i].hit) {
                 beatMap[i].hit = true;
                 strcpy(feedbackText, "Miss :(");
@@ -120,7 +131,6 @@ int main(void) {
             }
         }
 
-        // Penaliza si toca antes de tiempo (sin nota en rango)
         if (IsKeyPressed(KEY_SPACE) && !noteInRange) {
             strcpy(feedbackText, "Muy Pronto!");
             feedbackTimer = 30;
@@ -128,7 +138,6 @@ int main(void) {
             if (score < 0) score = 0;
         }
 
-        // UI: puntaje y feedback
         DrawText(TextFormat("Puntuacion: %04i", score), 10, 10, 24, GREEN);
         if (feedbackTimer > 0) {
             DrawText(feedbackText, SCREEN_WIDTH/2 - MeasureText(feedbackText, 24)/2, 80, 24, YELLOW);
