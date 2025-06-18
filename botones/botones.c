@@ -5,7 +5,6 @@
 #include "tdas/list.h"
 #include "tdas/map.h"
 #include "tdas/array.h"
-#define EnergiaMax 100;
 
 typedef enum {
     COMIDA,
@@ -109,49 +108,44 @@ Mascota* crearMascotaConInput(Escenario* escenarioInicial) {
     return m;
 }
 
-void alimentarMascota(Mascota* m) {
-    Item* item = (Item*)firstList(m->inventario);  // Primer ítem
+void alimentarMascotaRaylib(Mascota* m) {
+    Item* item = list_first(m->inventario);  // recorro inventario
 
     while (item != NULL) {
         if (item->tipo == COMIDA) {
             if (m->energia < 100) {
                 m->energia += item->valor_energetico;
                 if (m->energia > 100) m->energia = 100;
-                list_remove(m->inventario, item); // Elimina la comida consumida
-                printf("La mascota ha comido y ahora tiene %d de energía.\n", m->energia);
+                list_popCurrent(m->inventario);  // Elimino del inventario la comida utilizada
+
+                // Mensaje de que se alimentó con éxito
+                for (int frames = 0; frames < 90; frames++) {
+                    BeginDrawing();
+                        ClearBackground(RAYWHITE);
+                        DrawText("¡La mascota ha comido!", 300, 280, 20, DARKGREEN);
+                        DrawText(TextFormat("Energía actual: %d", m->energia), 300, 310, 20, DARKGREEN);
+                    EndDrawing();
+                }
             } else {
-                printf("La energía ya está al máximo.\n");
+                for (int frames = 0; frames < 90; frames++) {
+                    BeginDrawing();
+                        ClearBackground(RAYWHITE);
+                        DrawText("La energía ya está al máximo.", 300, 290, 20, RED);
+                    EndDrawing();
+                }
             }
-            return; // Termina después de consumir una comida
+            return;
         }
-        item = (Item*)nextList(m->inventario);
+        item = list_next(m->inventario);
     }
 
-    printf("No tienes comida en el inventario.\n");
-}
-
-void jugarMinijuego(Mascota* m) {
-    if (m->energia <= 0) {
-        printf("La mascota está demasiado cansada para jugar.\n");
-        return;
+    // No se encontró comida en el inventario 
+    for (int frames = 0; frames < 90; frames++) {
+        BeginDrawing();
+            ClearBackground(RAYWHITE);
+            DrawText("No tienes comida en el inventario.", 250, 290, 20, RED);
+        EndDrawing();
     }
-
-    int k = 5; // Ejemplo: 5 notas
-    int monedasGanadas = 0;
-
-    for (int i = 0; i < k; i++) {
-        printf("Nota %d: presiona ENTER\n", i+1);
-        getchar(); // simula entrada de nota
-        monedasGanadas += 5;
-    }
-
-    if (m->energia == 100) monedasGanadas += 10;
-
-    m->monedas += monedasGanadas;
-    m->energia -= 20;
-    if (m->energia < 0) m->energia = 0;
-
-    printf("Ganaste %d monedas. Energía restante: %d\n", monedasGanadas, m->energia);
 }
 
 
