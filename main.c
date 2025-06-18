@@ -5,6 +5,7 @@
 #include "tdas/list.h"
 #include "tdas/map.h"
 #include "tdas/array.h"
+#include "botones/juego.h"
  
 #define NUM_FRAMES  3       // Number of frames (rectangles) for the button sprite texture
 #define NUM_BUTTONS 6
@@ -185,7 +186,11 @@ int main(void)
             }
             else if (pantallaActual == MENU_JUEGO) {
                 DrawText("JUEGO", 20, 20, 30, DARKGREEN);
-                DrawText("Presiona BACKSPACE para volver", 20, 60, 20, GRAY);
+                DrawText("Presiona Y para jugar", 20, 60, 20, GRAY);
+                DrawText("Presiona BACKSPACE para volver", 20, 100, 20, GRAY);
+                if (IsKeyPressed(KEY_Y)) {
+                    //juegoRitmico(); // Llama a la función del juego
+                }
                 if (IsKeyPressed(KEY_BACKSPACE)) pantallaActual = MENU_PRINCIPAL;
             }
             else if (pantallaActual == MENU_CONFIG) {

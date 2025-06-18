@@ -26,10 +26,10 @@
 # Define required raylib variables
 PROJECT_NAME       ?= game
 RAYLIB_VERSION     ?= 5.1-dev
-RAYLIB_PATH        ?= C:\raylib\raylib
+RAYLIB_PATH        ?= C:/raylib/raylib
 
 # Define compiler path on Windows
-COMPILER_PATH      ?= C:\raylib\w64devkit\bin
+COMPILER_PATH      ?= C:/raylib/w64devkit/bin
 
 # Define default options
 # One of PLATFORM_DESKTOP, PLATFORM_ANDROID, PLATFORM_WEB
