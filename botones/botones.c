@@ -40,42 +40,73 @@ typedef struct Mascota {
     Item* zapatos;
 } Mascota;
 
-Mascota* crearMascota(const char* nombre, Escenario* escenarioInicial) {
-    Mascota* m = malloc(sizeof(Mascota)); //falta que usuario introduzca el nombre de su mascota.
-    m->nombre = strdup(nombre);
-    m->energia = EnergiaMax; //energía inicial = Máxima
-    m->monedas = 0;  // Monedas iniciales
+Mascota* crearMascotaConInput(Escenario* escenarioInicial) {
+    char nombreMascota[32] = "";
+    bool nombreIngresado = false;
+    bool textBoxEditMode = true;
+    Rectangle textBox = { 350, 300, 300, 50 };
+
+    SetMouseCursor(MOUSE_CURSOR_IBEAM);
+
+    while (!nombreIngresado && !WindowShouldClose()) {
+        if (CheckCollisionPointRec(GetMousePosition(), textBox)) {
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) textBoxEditMode = true;
+        } else {
+            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) textBoxEditMode = false;
+        }
+
+        if (textBoxEditMode) {
+            int key = GetCharPressed();
+            while (key > 0) {
+                if ((key >= 32) && (key <= 125) && (strlen(nombreMascota) < 31)) {
+                    int len = strlen(nombreMascota);
+                    nombreMascota[len] = (char)key;
+                    nombreMascota[len + 1] = '\0';
+                }
+                key = GetCharPressed();
+            }
+
+            if (IsKeyPressed(KEY_BACKSPACE)) {
+                int len = strlen(nombreMascota);
+                if (len > 0) nombreMascota[len - 1] = '\0';
+            }
+
+            if (IsKeyPressed(KEY_ENTER) && strlen(nombreMascota) > 0) {
+                nombreIngresado = true;
+            }
+        }
+
+        //dibujo
+        BeginDrawing();
+            ClearBackground(RAYWHITE);
+            DrawText("Ingresa el nombre de tu mascota y presiona ENTER:", 250, 240, 20, DARKGRAY);
+            DrawRectangleRec(textBox, LIGHTGRAY);
+            DrawRectangleLinesEx(textBox, 1, GRAY);
+            DrawText(nombreMascota, (int)textBox.x + 5, (int)textBox.y + 15, 20, MAROON);
+
+            if (textBoxEditMode) DrawText("_", (int)textBox.x + 5 + MeasureText(nombreMascota, 20), (int)textBox.y + 15, 20, MAROON);
+        EndDrawing();
+    }
+
+    ClearBackground(RAYWHITE);
+
+    //Inicializa la mascota
+    Mascota* m = (Mascota*)malloc(sizeof(Mascota));
+    if (!m) return NULL;
+
+    m->nombre = strdup(nombreMascota);
+    m->energia = 100;
+    m->monedas = 0;
     m->escenario_actual = escenarioInicial;
-    m->inventario = list_create(); // Lista vacía
+    m->inventario = list_create();
     m->sombrero = NULL;
     m->camisa = NULL;
     m->pantalones = NULL;
     m->zapatos = NULL;
+
+    SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+
     return m;
-}
-
-void mostrarMenu(Mascota* mascota) {
-    int opcion;
-    do {
-        printf("\n--- Menú Principal ---\n");
-        printf("1. Alimentar mascota\n");
-        printf("2. Jugar minijuego\n");
-        printf("3. Ir a la tienda\n");
-        printf("4. Cambiar ropa/accesorios\n");
-        printf("5. Cambiar de escenario\n");
-        printf("6. Opciones del sistema\n");
-        printf("0. Salir\n");
-        scanf("%d", &opcion);
-
-        switch (opcion) {
-            case 1: alimentarMascota(mascota); break;
-            case 2: jugarMinijuego(mascota); break;
-            case 3: irATienda(mascota); break;
-            case 4: cambiarRopa(mascota); break;
-            case 5: cambiarEscenario(mascota); break;
-            case 6: opcionesSistema(&mascota); break;
-        }
-    } while (opcion != 0);
 }
 
 void alimentarMascota(Mascota* m) {
