@@ -17,10 +17,9 @@ typedef struct {
 
 void juegoRitmico() {
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Rhythm Game");
-    InitAudioDevice();
     SetTargetFPS(60);
 
-    Music music = LoadMusicStream("resources/Nothing.wav");
+    Music music = LoadMusicStream("../resources/Nothing.wav");
     if (!IsMusicValid(music)) {
         DrawText("No se encontro el archivo de audio.", 100, 100, 30, RED);
         while (!WindowShouldClose()) { BeginDrawing(); ClearBackground(BLACK); EndDrawing(); }
@@ -99,9 +98,5 @@ void juegoRitmico() {
         }
         EndDrawing();
     }
-
-    UnloadMusicStream(music);
-    CloseAudioDevice();
-    CloseWindow();
     return 0;
 }
