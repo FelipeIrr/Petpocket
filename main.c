@@ -15,7 +15,7 @@
 #define SCREEN_HEIGHT 650
 // Juego Ritmico
 #define NOTE_SIZE 30
-#define HIT_ZONE_Y (SCREEN_HEIGHT - 100)
+#define HIT_ZONE_Y (SCREEN_HEIGHT - 300)
 #define HIT_THRESHOLD 0.15f
 #define NOTE_SPEED 300.0f
 
@@ -64,10 +64,7 @@ typedef struct Mascota {
     int monedas;
     Escenario* escenario_actual;
     List* inventario; // ítems en inventario
-    Item* sombrero;
-    Item* camisa;
-    Item* pantalones;
-    Item* zapatos;
+    Map* aspecto;
 } Mascota;
 
 void juegoRitmico() {
@@ -84,7 +81,7 @@ void juegoRitmico() {
     PlayMusicStream(music);
 
     // Definir beatmap (segundos)
-    float bpm = 120.0f; // Cambia esto al BPM de tu canción
+    float bpm = 180.0f; // Cambia esto al BPM de tu canción
     float songLength = GetMusicTimeLength(music);
     int beatCount = (int)(songLength * bpm / 60.0f);
     if (beatCount > 512) beatCount = 512; // <-- Limita el número de beats
@@ -123,7 +120,7 @@ void juegoRitmico() {
             if (y < HIT_ZONE_Y - NOTE_SIZE*2) {
                 // Ya pasó la zona -> missed
                 beatMap[i].hit = true;
-                strcpy(feedbackText, "Miss 😢");
+                strcpy(feedbackText, "Miss :(");
                 feedbackTimer = 30;
                 continue;
             }
@@ -134,7 +131,7 @@ void juegoRitmico() {
                     if (diff < HIT_THRESHOLD) {
                         beatMap[i].hit = true;
                         score += (diff < 0.05f ? 300 : 100);
-                        strcpy(feedbackText, diff < 0.05f ? "Perfect!" : "Good!");
+                        strcpy(feedbackText, diff < 0.05f ? "EXCELENTE!" : "Bien!");
                         feedbackTimer = 30;
                     }
                 }
