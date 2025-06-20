@@ -24,15 +24,15 @@ Pantalla pantallaActual = MENU_PRINCIPAL;
 
 typedef enum {
     COMIDA,
-    ROPA
+    ASPECTO
 } TipoItem;
 
 typedef struct Item {
-    char* nombre;         
-    TipoItem tipo;
+    char* nombre;        
+    TipoItem tipo; 
     int precio;
-    int valor_energetico;   // solo aplica si tipo == COMIDA
-    char* tipo_prenda;      // solo aplica si tipo == ROPA
+    int valor_energetico;
+    Texture2D aspecto;  // si es tipo aspecto  
 } Item;
 
 typedef struct Escenario {
@@ -49,10 +49,6 @@ typedef struct Mascota {
     int monedas;
     Escenario* escenario_actual;
     List* inventario; // ítems en inventario
-    Item* sombrero;
-    Item* camisa;
-    Item* pantalones;
-    Item* zapatos;
 } Mascota;
 
 //------------------------------------------------------------------------------------
