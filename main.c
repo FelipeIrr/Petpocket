@@ -22,7 +22,7 @@ typedef enum {
 
 Pantalla pantallaActual = MENU_PRINCIPAL;
 
-typedef enum {
+typedef enum { //MODULARIZAR ESTRCTURAS
     COMIDA,
     ROPA
 } TipoItem;
