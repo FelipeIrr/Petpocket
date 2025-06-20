@@ -39,7 +39,7 @@ typedef struct Mascota {
     Item* zapatos;
 } Mascota;
 
-Mascota* crearMascotaConInput(Escenario* escenarioInicial) {
+Mascota* crearMascota(Escenario* escenarioInicial) {
     char nombreMascota[32] = "";
     bool nombreIngresado = false;
     bool textBoxEditMode = true;
@@ -108,7 +108,7 @@ Mascota* crearMascotaConInput(Escenario* escenarioInicial) {
     return m;
 }
 
-void alimentarMascotaRaylib(Mascota* m) {
+void alimentarMascota(Mascota* m) {
     Item* item = list_first(m->inventario);  // recorro inventario
 
     while (item != NULL) {
