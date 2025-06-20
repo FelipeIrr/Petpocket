@@ -351,6 +351,13 @@ rwildcard=$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subst 
 SRC_DIR = src
 OBJ_DIR = obj
 
+SRC_DIRS := botones tdas
+SRCS := main.c $(wildcard $(addsuffix /*.c,$(SRC_DIRS)))
+OBJS := $(SRCS:.c=.o)
+
+CFLAGS := -I. -Ibotones -Itdas -I"C:/Ruta/a/raylib/include"
+LDFLAGS := -L"C:/Ruta/a/raylib/lib" -lraylib -lopengl32 -lgdi32 -lwinmm
+
 # Define all object files from source files
 SRC = $(call rwildcard, ./, *.c, *.h)
 #OBJS = $(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
