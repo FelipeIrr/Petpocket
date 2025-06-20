@@ -7,17 +7,12 @@
 #include "tdas/list.h"
 #include "tdas/map.h"
 #include "tdas/array.h"
+#include "botones/juego.h" // Incluye el juego rítmico
 
  
 #define NUM_FRAMES  3       // Number of frames (rectangles) for the button sprite texture
 #define NUM_BUTTONS 6
-#define SCREEN_WIDTH 1000
-#define SCREEN_HEIGHT 650
 // Juego Ritmico
-#define NOTE_SIZE 30
-#define HIT_ZONE_Y (SCREEN_HEIGHT - 100)
-#define HIT_THRESHOLD 0.15f
-#define NOTE_SPEED 300.0f
 
 // 1. Enum para los menús
 typedef enum {
@@ -29,11 +24,6 @@ typedef enum {
     MENU_LUGARES,
     MENU_CONFIG
 } Pantalla;
-
-typedef struct {
-    float time;     // segundo del beat
-    bool hit;
-} Beat;
 
 Pantalla pantallaActual = MENU_PRINCIPAL;
 
@@ -70,94 +60,7 @@ typedef struct Mascota {
     Item* zapatos;
 } Mascota;
 
-void juegoRitmico() {
 
-    // Asegúrate de que la ventana y el audio estén inicializados antes de llamar a esta función
-    // Si ya están inicializados en main, no es necesario volver a inicializarlos aquí
-
-    Music music = LoadMusicStream("resources/Nothing.wav");
-    if (!IsMusicValid(music)) {
-        // Mostrar mensaje de error en consola y salir de la función
-        printf("No se encontro el archivo de audio.\n");
-        return;
-    }
-    PlayMusicStream(music);
-
-    // Definir beatmap (segundos)
-    float bpm = 120.0f; // Cambia esto al BPM de tu canción
-    float songLength = GetMusicTimeLength(music);
-    int beatCount = (int)(songLength * bpm / 60.0f);
-    if (beatCount > 512) beatCount = 512; // <-- Limita el número de beats
-    Beat beatMap[512]; // Máximo 512 beats
-
-    for (int i = 0; i < beatCount; i++) {
-        beatMap[i].time = (60.0f / bpm) * i;
-        beatMap[i].hit = false;
-    }
-
-    int score = 0;
-    char feedbackText[32] = "";
-    int feedbackTimer = 0;
-
-    bool exitToMenu = false;
-    while (!WindowShouldClose() && !exitToMenu) {
-        UpdateMusicStream(music);
-        float t = GetMusicTimePlayed(music);
-
-        BeginDrawing();
-        ClearBackground(BLACK);
-
-        // Dibujo zona de impacto
-        DrawRectangle(0, HIT_ZONE_Y - NOTE_SIZE/2, SCREEN_WIDTH, NOTE_SIZE, GRAY);
-        DrawText("PRESS SPACE", SCREEN_WIDTH/2 - 80, HIT_ZONE_Y + 40, 20, RAYWHITE);
-        DrawText("BACKSPACE: Volver al menu", 10, SCREEN_HEIGHT - 30, 20, LIGHTGRAY);
-
-        // Dibujar y chequear notas
-        for (int i = 0; i < beatCount; i++) {
-            if (beatMap[i].hit) continue;
-
-            float dt = t - beatMap[i].time;
-            float y = HIT_ZONE_Y - dt * NOTE_SPEED;
-
-            if (y > SCREEN_HEIGHT) continue; // Aún no aparece
-            if (y < HIT_ZONE_Y - NOTE_SIZE*2) {
-                // Ya pasó la zona -> missed
-                beatMap[i].hit = true;
-                strcpy(feedbackText, "Miss 😢");
-                feedbackTimer = 30;
-                continue;
-            }
-            if (y > -NOTE_SIZE && y < SCREEN_HEIGHT) {
-                DrawCircle(SCREEN_WIDTH/2, (int)y, NOTE_SIZE, BLUE);
-                if (IsKeyPressed(KEY_SPACE)) {
-                    float diff = fabsf(dt);
-                    if (diff < HIT_THRESHOLD) {
-                        beatMap[i].hit = true;
-                        score += (diff < 0.05f ? 300 : 100);
-                        strcpy(feedbackText, diff < 0.05f ? "Perfect!" : "Good!");
-                        feedbackTimer = 30;
-                    }
-                }
-            }
-        }
-
-        // UI: puntaje y feedback
-        DrawText(TextFormat("Score: %04i", score), 10, 10, 24, GREEN);
-        if (feedbackTimer > 0) {
-            DrawText(feedbackText, SCREEN_WIDTH/2 - MeasureText(feedbackText, 24)/2, HIT_ZONE_Y - 60, 24, YELLOW);
-            feedbackTimer--;
-        }
-        
-        if (IsKeyPressed(KEY_BACKSPACE)) {
-            exitToMenu = true; // Volver al menú
-        }
-
-        EndDrawing();
-    }
-
-    StopMusicStream(music);
-    UnloadMusicStream(music);
-}
 
 //------------------------------------------------------------------------------------
 // Program main entry point

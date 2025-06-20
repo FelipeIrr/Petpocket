@@ -19,6 +19,10 @@
                     "RAYLIB_PATH=C:/raylib/raylib",
                     "PROJECT_NAME=${fileBasenameNoExtension}",
                     "OBJS=${fileBasenameNoExtension}.c",
+                    "${workspaceFolder}/botones/*.c",
+                    "${workspaceFolder}/botones/*.h",
+                    "${workspaceFolder}/tdas/*.c",
+                    "${workspaceFolder}/tdas/*.h",
                     "BUILD_MODE=DEBUG"
                 ],
             },
