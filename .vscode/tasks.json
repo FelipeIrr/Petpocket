@@ -5,11 +5,8 @@
     "tasks": [
         {
             "label": "build debug",
-            "type": "shell",
+            "type": "process",
             "command": "make",
-            "options": {
-                "cwd": "${workspaceFolder}"
-            },
             "args": [
                 "PLATFORM=PLATFORM_DESKTOP",
                 "BUILD_MODE=DEBUG",
@@ -21,7 +18,7 @@
                 "args": [
                     "RAYLIB_PATH=C:/raylib/raylib",
                     "PROJECT_NAME=${fileBasenameNoExtension}",
-                    "OBJS=${fileBasenameNoExtension}.c",
+                    "OBJS=${fileBasenameNoExtension}.c botones/*.c tdas/*.c",
                     "BUILD_MODE=DEBUG"
                 ],
             },
@@ -62,11 +59,7 @@
                 "args": [
                     "RAYLIB_PATH=<path_to_raylib>/raylib",
                     "PROJECT_NAME=${fileBasenameNoExtension}",
-                    "OBJS=${fileBasenameNoExtension}.c",
-                    "${workspaceFolder}/botones/*.c",
-                    "${workspaceFolder}/botones/*.h",
-                    "${workspaceFolder}/tdas/*.c",
-                    "${workspaceFolder}/tdas/*.h"
+                    "OBJS=${fileBasenameNoExtension}.c"
                 ],
             },
             "group": "build",

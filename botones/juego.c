@@ -12,31 +12,18 @@
 #define NOTE_SPEED 300.0f
 #define CIRCLE_RADIUS 180.0f
 
-
 typedef struct {
     float time;     // segundo del beat
     bool hit;
 } Beat;
 
-void juegoRitmico(void) {
-    InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Rhythm Game");
-    InitAudioDevice();
-    SetMasterVolume(0.2f); // Ajusta el volumen general
-    SetTargetFPS(60);
-
-    // Asegúrate de que la ventana y el audio estén inicializados antes de llamar a esta función
-    // Si ya están inicializados en main, no es necesario volver a inicializarlos aquí
+void juegoRitmico() {
 
     Music music = LoadMusicStream("resources/Nothing.wav");
     if (!IsMusicValid(music)) {
-        while (!WindowShouldClose()) { 
-            BeginDrawing(); 
-            ClearBackground(BLACK); 
-            DrawText("No se encontro el archivo de audio.", 100, 100, 30, RED);
-            EndDrawing(); 
-        }
+        DrawText("No se encontro el archivo de audio.", 100, 100, 30, RED);
+        while (!WindowShouldClose()) { BeginDrawing(); ClearBackground(BLACK); EndDrawing(); }
         CloseWindow();
-        return;
     }
     PlayMusicStream(music);
 
@@ -155,4 +142,7 @@ void juegoRitmico(void) {
 
         EndDrawing();
     }
+
+    StopMusicStream(music);
+    UnloadMusicStream(music);
 }
