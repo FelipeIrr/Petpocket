@@ -10,6 +10,8 @@
 #define HIT_ZONE_Y (SCREEN_HEIGHT - 300)
 #define HIT_THRESHOLD 0.15f
 #define NOTE_SPEED 300.0f
+#define CIRCLE_RADIUS 180.0f
+
 
 typedef struct {
     float time;     // segundo del beat
