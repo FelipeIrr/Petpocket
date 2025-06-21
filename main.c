@@ -112,8 +112,14 @@ int main(void)
     Texture2D imagen2D = LoadTexture("resources/yipeee!.png"); // Imagen central
 
     // Crea un plano 3D para el fondo
-    Model fondoModel = LoadModelFromMesh(GenMeshPlane(20, 20, 1, 1));
+    Model fondoModel = LoadModelFromMesh(GenMeshPlane(20, 30, 1, 1));
     fondoModel.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = fondo;
+    
+    // Cargar textura para el piso
+    Texture2D pisoTexture = LoadTexture("resources/piso.png");
+    Mesh pisoMesh = GenMeshPlane(20, 20, 1, 1);
+    Model Piso = LoadModelFromMesh(pisoMesh);
+    Piso.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = pisoTexture;
 
     // Crea un modelo 3D para el ecenario
     Model guitarra = LoadModel("resources/guitarra1.glb");
@@ -174,7 +180,7 @@ int main(void)
                 DrawModel(skyboxModel, (Vector3){0,0,0}, 1.0f, WHITE);
                 rlEnableBackfaceCulling();
                 DrawBillboard(camera, imagen2D, (Vector3){0,1,0}, 2.0f, WHITE);
-                DrawModel(fondoModel, (Vector3){0,0,0}, 1.0f, WHITE);
+                DrawModel(Piso, (Vector3){0,0,0}, 1.0f, WHITE);
                 DrawModelEx(guitarra, (Vector3){3,1,0}, (Vector3){-4,4,1}, 45.0f, (Vector3){2,2,2}, WHITE);
             EndMode3D();
 
