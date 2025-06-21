@@ -344,25 +344,41 @@ ifeq ($(PLATFORM),PLATFORM_WEB)
     LDLIBS = $(RAYLIB_RELEASE_PATH)/libraylib.a
 endif
 
-# Lista de carpetas con código fuente
-SRC_DIRS := . botones tdas
+# Define a recursive wildcard function
+rwildcard=$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subst *,%,$2),$d))
 
-# Busca todos los .c en esas carpetas
-SRCS := $(foreach dir,$(SRC_DIRS),$(wildcard $(dir)/*.c))
-OBJS ?= main.c
+# Define all source files required
+SRC_DIR = src
+OBJ_DIR = obj
 
-INCLUDE_PATHS = -I. -I$(RAYLIB_PATH)/src -I$(RAYLIB_PATH)/src/external -Ibotones -Itdas
-CFLAGS += -Wall -std=c99
-LDFLAGS = -L$(RAYLIB_PATH)/src
-LDLIBS = -lraylib -lopengl32 -lgdi32 -lwinmm
+# Define all object files from source files
+SRC = $(call rwildcard, ./, *.c, *.h)
+#OBJS = $(SRC:$(SRC_DIR)/%.c=$(OBJ_DIR)/%.o)
+OBJS = $(patsubst %.c,%.o,$(filter %.c,$(SRC)))
 
-all: $(PROJECT_NAME).exe
+# For Android platform we call a custom Makefile.Android
+ifeq ($(PLATFORM),PLATFORM_ANDROID)
+    MAKEFILE_PARAMS = -f Makefile.Android
+    export PROJECT_NAME
+    export SRC_DIR
+else
+    MAKEFILE_PARAMS = $(PROJECT_NAME)
+endif
 
-$(PROJECT_NAME).exe: $(OBJS)
-	$(CC) -o $@ $^ $(CFLAGS) $(INCLUDE_PATHS) $(LDFLAGS) $(LDLIBS)
+# Default target entry
+# NOTE: We call this Makefile target or Makefile.Android target
+all:
+	$(MAKE) $(MAKEFILE_PARAMS)
 
-%.o: %.c
-	$(CC) -c $< -o $@ $(CFLAGS) $(INCLUDE_PATHS)
+# Project target defined by PROJECT_NAME
+$(PROJECT_NAME): $(OBJS)
+	$(CC) -o $(PROJECT_NAME)$(EXT) $(OBJS) $(CFLAGS) $(INCLUDE_PATHS) $(LDFLAGS) $(LDLIBS) -D$(PLATFORM)
+
+# Compile source files
+# NOTE: This pattern will compile every module defined on $(OBJS)
+#%.o: %.c
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+	$(CC) -c $< -o $@ $(CFLAGS) $(INCLUDE_PATHS) -D$(PLATFORM)
 
 # Clean everything
 clean:

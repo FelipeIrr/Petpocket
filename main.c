@@ -8,12 +8,18 @@
 #include "tdas/list.h"
 #include "tdas/map.h"
 #include "tdas/array.h"
+#include "botones/juego.h" // Incluye el juego rítmico
 
  
 #define NUM_FRAMES  3       // Number of frames (rectangles) for the button sprite texture
 #define NUM_BUTTONS 6
-
+#define SCREEN_WIDTH 1000
+#define SCREEN_HEIGHT 650
 // Juego Ritmico
+#define NOTE_SIZE 30
+#define HIT_ZONE_Y (SCREEN_HEIGHT - 100)
+#define HIT_THRESHOLD 0.15f
+#define NOTE_SPEED 300.0f
 
 // 1. Enum para los menús
 typedef enum {
@@ -25,11 +31,6 @@ typedef enum {
     MENU_LUGARES,
     MENU_CONFIG
 } Pantalla;
-
-typedef struct {
-    float time;     // segundo del beat
-    bool hit;
-} Beat;
 
 Pantalla pantallaActual = MENU_PRINCIPAL;
 
