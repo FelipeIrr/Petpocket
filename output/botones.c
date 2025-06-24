@@ -37,6 +37,7 @@ typedef struct Mascota {
     int monedas;
     Escenario* escenario_actual;
     List* inventario; // ítems en inventario
+    Texture2D aspecto_actual; // textura del aspecto actual
 } Mascota;
 
 
@@ -385,4 +386,67 @@ void opcionesDelSistema(Mascota** mascota, Escenario* escenario_inicial) {
     }
 }
 
+//CAMBIAR ASPECTO DE LA MASCOTA
+void cambiarAspectoMascota(Mascota* mascota) {
+    int cantidad = 0;
+    Item* aspectos[20];  //  20 aspectos distintos (recordar ampliar esto)
+
+    void* actual = list_first(mascota->inventario);
+    while (actual && cantidad < 20) {
+        Item* item = (Item*)actual;
+        if (item->tipo == ASPECTO) {
+            aspectos[cantidad++] = item;
+        }
+        actual = list_next(mascota->inventario);
+    }
+
+    if (cantidad == 0) {
+        // No hay aspectos disponibles
+        for (int i = 0; i < 90; i++) {
+            BeginDrawing();
+            ClearBackground(RAYWHITE);
+            DrawText("No tienes aspectos disponibles.", 300, 300, 20, RED);
+            EndDrawing();
+        }
+        return;
+    }
+
+    int seleccion = 0;
+
+    while (!WindowShouldClose()) {
+        BeginDrawing();
+        ClearBackground(RAYWHITE);
+        DrawText("Selecciona un aspecto con <- y ->, ENTER para confirmar", 180, 50, 20, DARKGRAY);
+
+        // Dibuja el aspecto seleccionado
+        DrawTexture(aspectos[seleccion]->aspecto, 400, 150, WHITE);
+        DrawText(aspectos[seleccion]->nombre, 400, 400, 20, BLACK);
+
+        EndDrawing();
+
+        // Cambiar selección con teclas
+        if (IsKeyPressed(KEY_RIGHT)) {
+            seleccion = (seleccion + 1) % cantidad;
+        }
+        if (IsKeyPressed(KEY_LEFT)) {
+            seleccion = (seleccion - 1 + cantidad) % cantidad;
+        }
+
+        // Confirmar selección
+        if (IsKeyPressed(KEY_ENTER)) {
+            mascota->aspecto_actual = aspectos[seleccion]->aspecto;
+
+            for (int i = 0; i < 60; i++) {
+                BeginDrawing();
+                ClearBackground(RAYWHITE);
+                DrawText("¡Aspecto actualizado!", 300, 300, 20, DARKGREEN);
+                EndDrawing();
+            }
+            break;
+        }
+
+        // Salir sin cambiar si presiona ESC
+        if (IsKeyPressed(KEY_ESCAPE)) break;
+    }
+}
 
