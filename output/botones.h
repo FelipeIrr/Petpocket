@@ -36,20 +36,23 @@ typedef struct Mascota {
     List* inventario; // ítems en inventario
 } Mascota;
 
+
+//CREAR MASCOTA
 Mascota* crearMascota(Escenario* escenarioInicial);
-//FUNCIONES AUXILIARES DEL JUEGO
-//--------------------------------------------------------------------------------------------------------------------------------------
 
 //ALIMENTAR MASCOTA
 void alimentarMascota(Mascota* m);
+
 // AVANZAR DE ESCENARIO
 void cambiarEscenario(Mascota* mascota, Array* escenarios);
+
 // ACCESO A TIENDA
 void tienda(Mascota* mascota);
 
 //OPCIONES DEL JUEGO
 void opcionesDelSistema(Mascota** mascota, Escenario* escenario_inicial);
 
-
+// CAMBIAR ASPECTO DE MASCOTA
+void cambiarAspectoMascota(Mascota* mascota);   
 
 #endif
