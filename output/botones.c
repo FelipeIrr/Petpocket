@@ -1,10 +1,14 @@
+#include "botones.h"
 #include "raylib.h"
 #include "rlgl.h"
 #include "raymath.h"
 #include <math.h>
+#include <string.h>
+#include <strings.h>
 #include "tdas/list.h"
 #include "tdas/map.h"
 #include "tdas/array.h"
+
 
 typedef enum {
     COMIDA,
