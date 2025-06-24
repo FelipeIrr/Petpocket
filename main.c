@@ -49,6 +49,7 @@ typedef struct Mascota {
     int monedas;
     Escenario* escenario_actual;
     List* inventario; // ítems en inventario
+    Texture2D aspectoActual; 
 } Mascota;
 
 //------------------------------------------------------------------------------------
