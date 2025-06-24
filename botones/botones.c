@@ -37,7 +37,7 @@ typedef struct Mascota {
 
 
 //CREAR MASCOTA
-Mascota* crearMascota(Escenario* escenarioInicial) {
+Mascota* crearMascota(Escenario* escenarioInicial) { // REVISAR
     char nombreMascota[32] = "";
     bool nombreIngresado = false;
     bool textBoxEditMode = true;
@@ -106,7 +106,7 @@ Mascota* crearMascota(Escenario* escenarioInicial) {
 //--------------------------------------------------------------------------------------------------------------------------------------
 
 //ALIMENTAR MASCOTA
-void alimentarMascota(Mascota* m) {
+void alimentarMascota(Mascota* m) { //REVISAR
     Item* item = list_first(m->inventario);  // recorro inventario
 
     while (item != NULL) {
