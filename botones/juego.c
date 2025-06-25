@@ -19,6 +19,10 @@ typedef struct {
 
 void juegoRitmico() {
 
+        Texture2D metro = LoadTexture("resources/metro.png");
+        Texture2D hitmark = LoadTexture("resources/hitmark.png");
+        Texture2D confeti = LoadTexture("resources/confeti.png");
+
         Music music = LoadMusicStream("resources/Nothing.wav");
         if (!IsMusicValid(music)) {
             DrawText("No se encontro el archivo de audio.", 100, 100, 30, RED);
@@ -69,6 +73,17 @@ void juegoRitmico() {
             BeginDrawing();
             ClearBackground(BLACK);
 
+            // Dibuja la textura metro como fondo, escalada y con opacidad reducida
+            Color alphaMetro = (Color){255, 255, 255, 120}; // Opacidad 120/255
+            DrawTexturePro(
+                metro,
+                (Rectangle){0, 0, metro.width, metro.height},
+                (Rectangle){0, 0, SCREEN_WIDTH, SCREEN_HEIGHT},
+                (Vector2){0, 0},
+                0.0f,
+                alphaMetro
+            );
+
             // Centro de la pantalla
             float cx = SCREEN_WIDTH / 2.0f;
             float cy = SCREEN_HEIGHT / 2.0f;
@@ -81,16 +96,21 @@ void juegoRitmico() {
             // Tamaño y color del cuadrado según efecto
             float baseSize = NOTE_SIZE * 2;
             float squareSize = baseSize + (barEffectTimer > 0 ? NOTE_SIZE * 1.5f : 0);
-            Color squareColor = (barEffectTimer > 0) ? GREEN : YELLOW;
-
             if (barEffectTimer > 0) barEffectTimer--;
 
-            // Dibuja el cuadrado centrado y rotado en su propio eje en la zona de impacto
-            DrawRectanglePro(
-                (Rectangle){ hitX, hitY, squareSize, squareSize },
+            // Dibuja la textura de confeti centrada y rotada en la zona de impacto
+            DrawTexturePro(
+                confeti,
+                (Rectangle){hitX, hitY, squareSize, squareSize },
+                (Rectangle){
+                    hitX - squareSize/2,
+                    hitY - squareSize/2,
+                    squareSize,
+                    squareSize
+                },
                 (Vector2){ squareSize/2, squareSize/2 },
                 squareAngle,
-                squareColor
+                WHITE
             );
 
             // Dibuja la zona de impacto (círculo gris)
@@ -110,7 +130,20 @@ void juegoRitmico() {
 
                 if (dt < -2.0f || dt > 2.0f) continue;
 
-                DrawCircle((int)noteX, (int)noteY, NOTE_SIZE, BLUE);
+                // Dibuja la textura de la nota
+                DrawTexturePro(
+                    hitmark,
+                    (Rectangle){0, 0, hitmark.width, hitmark.height},
+                    (Rectangle){
+                        noteX - NOTE_SIZE,
+                        noteY - NOTE_SIZE,
+                        NOTE_SIZE * 2,
+                        NOTE_SIZE * 2
+                    },
+                    (Vector2){0, 0},
+                    0.0f,
+                    WHITE
+                );
 
                 float diff = fabsf(noteAngle - hitAngle);
                 if (diff > PI) diff = 2*PI - diff;
@@ -151,6 +184,9 @@ void juegoRitmico() {
             EndDrawing();
         }
 
+        UnloadTexture(metro);
+        UnloadTexture(hitmark);
+        UnloadTexture(confeti);
         StopMusicStream(music);
         UnloadMusicStream(music);
 }

@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "botones/juego.h"
+#include "botones/botones.h"
 #include "tdas/list.h"
 #include "tdas/map.h"
 #include "tdas/array.h"
@@ -24,42 +25,7 @@ typedef enum {
     MENU_CONFIG
 } Pantalla;
 
-typedef struct {
-    float time;     // segundo del beat
-    bool hit;
-} Beat;
-
 Pantalla pantallaActual = MENU_PRINCIPAL;
-
-typedef enum { //MODULARIZAR ESTRUCTURAS
-    COMIDA,
-    ASPECTO
-} TipoItem;
-
-typedef struct Item {
-    char* nombre;        
-    TipoItem tipo; 
-    int precio;
-    int valor_energetico;
-    Texture2D aspecto;  // si es tipo aspecto  
-} Item;
-
-typedef struct Escenario {
-    char* nombreEscenario;
-    Texture2D imagen_fondo;
-    int req_energia;
-    int req_monedas;
-    Map* tienda; //Mapa para la tienda
-} Escenario;
-
-typedef struct Mascota {
-    char* nombre;
-    int energia;
-    int monedas;
-    Escenario* escenario_actual;
-    List* inventario; // ítems en inventario
-    Map* aspecto;
-} Mascota;
 
 //------------------------------------------------------------------------------------
 // Program main entry point
@@ -71,7 +37,7 @@ int main(void)
     const int screenWidth = 1000;
     const int screenHeight = 650;
 
-    InitWindow(screenWidth, screenHeight, "raylib [textures] example - sprite button");
+    InitWindow(screenWidth, screenHeight, "PetPocket Mascota Personal");
 
     InitAudioDevice();      // Initialize audio device
 
@@ -132,9 +98,19 @@ int main(void)
 
     float angle = 0.0f;
 
+    // Ejemplo: 3 texturas diferentes para los botones
+    Texture2D buttonTextures[NUM_BUTTONS];
+    buttonTextures[0] = LoadTexture("resources/botonComida.png");        //boton comida
+    buttonTextures[1] = LoadTexture("resources/botonJuego.png");         //boton juego
+    buttonTextures[2] = LoadTexture("resources/botonLugares.png");       //boton lugares
+    buttonTextures[3] = LoadTexture("resources/botonTienda.png");        //boton tienda
+    buttonTextures[4] = LoadTexture("resources/botonInventario.png");    //boton accesorios
+    buttonTextures[5] = LoadTexture("resources/botonConfig.png");        //boton configuracion
+
     SetTargetFPS(60);
     //--------------------------------------------------------------------------------------
-
+    Mascota* Pocket = crearMascota();
+    
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
@@ -182,7 +158,7 @@ int main(void)
                 DrawText("MENU PRINCIPAL", 20, 20, 30, DARKBLUE);
                 for (int i = 0; i < NUM_BUTTONS; i++) {
                     sourceRec.y = btnState[i]*frameHeight;
-                    DrawTextureRec(button, sourceRec, (Vector2){ btnBounds[i].x, btnBounds[i].y }, WHITE);
+                    DrawTextureRec(buttonTextures[i], sourceRec, (Vector2){ btnBounds[i].x, btnBounds[i].y }, WHITE);
 
                     if (btnAction[i]) {
                         PlaySound(fxButton);
@@ -207,6 +183,55 @@ int main(void)
             else if (pantallaActual == MENU_CONFIG) {
                 DrawText("CONFIGURACION", 20, 20, 30, DARKGRAY);
                 DrawText("Presiona BACKSPACE para volver", 20, 60, 20, GRAY);
+
+                // Volumen
+                static float volumen = 0.5f;
+                DrawText(TextFormat("Volumen: %.0f%%", volumen * 100), 40, 110, 20, BLACK);
+                DrawRectangle(40, 140, 120, 10, GRAY);
+                DrawRectangle(40, 140, (int)(volumen * 120), 10, DARKGRAY);
+                if (CheckCollisionPointRec(GetMousePosition(), (Rectangle){40, 140, 120, 10}) && IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+                    volumen = (GetMousePosition().x - 40) / 120.0f;
+                    if (volumen < 0) volumen = 0;
+                    if (volumen > 1) volumen = 1;
+                    SetMasterVolume(volumen);
+                }
+
+                // Cambiar nombre
+                static char nuevoNombre[32] = "y";
+                DrawText("Nombre:", 40, 170, 20, BLACK);
+                DrawRectangle(120, 170, 150, 30, WHITE);
+                DrawText(nuevoNombre, 125, 175, 20, DARKGRAY);
+                int key = GetCharPressed();
+                while (key > 0) {
+                    int len = strlen(nuevoNombre);
+                    if (key >= 32 && key <= 125 && len < 31) {
+                        nuevoNombre[len] = (char)key;
+                        nuevoNombre[len + 1] = '\0';
+                    }
+                    key = GetCharPressed();
+                }
+                if (IsKeyPressed(KEY_BACKSPACE)) {
+                    int len = strlen(nuevoNombre);
+                    if (len > 0) nuevoNombre[len - 1] = '\0';
+                }
+                // Aquí deberías guardar el nombre en la estructura de la mascota si la tienes
+
+                // Botón Reiniciar
+                DrawRectangle(40, 220, 120, 40, ORANGE);
+                DrawText("Reiniciar", 60, 230, 20, WHITE);
+                if (CheckCollisionPointRec(GetMousePosition(), (Rectangle){40, 220, 120, 40}) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                    // Reiniciar lógica: puedes recargar variables, reiniciar el juego, etc.
+                    // Por ejemplo, podrías volver al menú principal:
+                    pantallaActual = MENU_PRINCIPAL;
+                    // Y reiniciar otras variables del juego aquí
+                }
+
+                // Botón Salir
+                DrawRectangle(180, 220, 120, 40, RED);
+                DrawText("Salir", 220, 230, 20, WHITE);
+                if (CheckCollisionPointRec(GetMousePosition(), (Rectangle){180, 220, 120, 40}) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+                    break;
+                }
                 if (IsKeyPressed(KEY_BACKSPACE)) pantallaActual = MENU_PRINCIPAL;
             }
             else if (pantallaActual == MENU_ACCESORIOS) {
@@ -229,9 +254,6 @@ int main(void)
                 DrawText("Presiona BACKSPACE para volver", 20, 60, 20, GRAY);
                 if (IsKeyPressed(KEY_BACKSPACE)) pantallaActual = MENU_PRINCIPAL;
             }
-
-            DrawText("a", 10, 10, 20, DARKGRAY);
-
         EndDrawing();
         //----------------------------------------------------------------------------------
     }
@@ -239,6 +261,9 @@ int main(void)
     // De-Initialization
     //--------------------------------------------------------------------------------------
     UnloadTexture(button);  // Unload button texture
+    for (int i = 0; i < NUM_BUTTONS; i++) {
+        UnloadTexture(buttonTextures[i]); // Unload each button texture
+    }
     UnloadSound(fxButton);  // Unload sound
     UnloadTexture(fondo);
     UnloadTexture(imagen2D);
