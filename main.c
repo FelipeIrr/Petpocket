@@ -10,7 +10,7 @@
 #include "tdas/map.h"
 #include "tdas/array.h"
 
- 
+
 #define NUM_FRAMES  3       // Number of frames (rectangles) for the button sprite texture
 #define NUM_BUTTONS 6
 
@@ -64,7 +64,7 @@ int main(void)
 
     Vector2 mousePoint = { 0.0f, 0.0f };
 
-    // Carga texturas
+    // Carga texturas //Puedo usar fondo como imagen predeterminada para crear mascota, pero debo hacerla tipo escenario
     Image fondoImg = LoadImage("resources/fondo.png");
     ImageFlipVertical(&fondoImg); // Invierte la imagen verticalmente
     Texture2D fondo = LoadTextureFromImage(fondoImg);
@@ -109,8 +109,17 @@ int main(void)
 
     SetTargetFPS(60);
     //--------------------------------------------------------------------------------------
-    Mascota* Pocket = crearMascota();
-
+    Array* vectorEscenarios = cargarEscenarios(); 
+    Mascota* Pocket = crearMascota(); 
+    Map* tiendas = createMap(100); 
+    for (int i = 0; i < array_size(vectorEscenarios); i++) {
+        Escenario* escenario = (Escenario*)array_get(vectorEscenarios, i);
+        if (escenario->tienda == NULL) {
+            crearTienda(escenario); 
+        }
+        insertMap(tiendas, escenario->nombreEscenario, escenario->tienda);
+    }
+    
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
@@ -246,8 +255,7 @@ int main(void)
             else if (pantallaActual == MENU_TIENDA) {
                 DrawText("TIENDA", 20, 20, 30, ORANGE);
                 DrawText("Presiona Y para comprar", 20, 60, 20, PURPLE);
-                crearTienda(Pocket->escenario_actual); // Crea la tienda 
-                mostrarTienda(Pocket, Pocket->escenario_actual->tienda); // Muestra la tienda
+                 // Muestra la tienda
                 DrawText("Presiona BACKSPACE para volver", 20, 60, 20, GRAY);
                 if (IsKeyPressed(KEY_BACKSPACE)) pantallaActual = MENU_PRINCIPAL;
             }

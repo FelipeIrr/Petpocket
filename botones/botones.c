@@ -15,7 +15,7 @@ TipoItem parseTipo(const char* tipoStr);
 // Las definiciones de TipoItem, Item, Escenario y Mascota ya están en botones.h
 
 //CREAR MASCOTA
-Mascota* crearMascota() {
+Mascota* crearMascota() { //Escenario* escenario) 
     char nombreMascota[32] = "";
     bool nombreIngresado = false;
     bool textBoxEditMode = true;
@@ -74,6 +74,7 @@ Mascota* crearMascota() {
     m->monedas = 0;
     m->inventario = list_create();
     m->aspecto_actual = LoadTexture("resources/yipeee!.png"); // Inicializar sin escenario
+    //m->escenario_actual =  //TESTING
 
     return m;
 }
@@ -84,7 +85,7 @@ void reiniciar(Mascota** mascota) {
     free(*mascota);
 
     // Crear nueva mascota con nombre temporal
-    *mascota = crearMascota();
+    *mascota = crearMascota(); //agregar escenario
 }
 
 void mostrarTienda(Mascota* mascota, Escenario* escenario) {
@@ -164,57 +165,95 @@ void mostrarTienda(Mascota* mascota, Escenario* escenario) {
     list_pushFront(mascota->inventario, itemSeleccionado);
 
     free(botones);
-}
+    return;
+} 
 
-// Cargar datos del csv
 void cargarItemsTienda(Map* tienda) {
-    FILE* file = fopen("resources/items.csv", "r");
-    if (!file) return;
+    char* texto = LoadFileText("resources/items.csv");
+    
+    char* linea = strtok(texto, "\r\n"); // Saltar encabezado
+    linea = strtok(NULL, "\r\n");
 
-    char line[256];
-    fgets(line, sizeof(line), file); // Saltar encabezado
-
-    while (fgets(line, sizeof(line), file)) {
+    while (linea != NULL) {
+        // Reservar ítem
         Item* item = malloc(sizeof(Item));
-        if (!item) continue;
+        item->ruta_imagen = NULL;
+        item->nombre = NULL;
 
-        char* token = strtok(line, ",");
-        item->nombre = strdup(token);
+        // Tokenizar los campos
+        char* nombre = strtok(linea, ",");
+        char* tipo = strtok(NULL, ",");
+        char* precioStr = strtok(NULL, ",");
+        char* valorStr = strtok(NULL, ",");
+        char* ruta = strtok(NULL, ",");
 
-        token = strtok(NULL, ",");
-        item->tipo = parseTipo(token);
+        // Copiar datos
+        item->nombre = strdup(nombre);
+        item->tipo = (strcmp(tipo, "COMIDA") == 0) ? COMIDA : ASPECTO;
+        item->precio = atoi(precioStr);
+        item->valor_energetico = atoi(valorStr);
 
-        token = strtok(NULL, ",");
-        item->precio = atoi(token);
-
-        token = strtok(NULL, ",");
-        item->valor_energetico = atoi(token);
-
-        token = strtok(NULL, ",\n");
-        item->ruta_imagen = token ? strdup(token) : NULL;
-
-        if (item->tipo == ASPECTO && item->ruta_imagen)
+        // Si es aspecto, cargar textura y guardar ruta
+        if (item->tipo == ASPECTO && ruta && strlen(ruta) > 0) {
+            item->ruta_imagen = strdup(ruta);
             item->aspecto = LoadTexture(item->ruta_imagen);
-        else
-            item->aspecto = (Texture2D){0};
+        } else {
+            item->aspecto = (Texture2D){ 0 };
+        }
 
+        // Insertar al mapa con clave el nombre
         insertMap(tienda, item->nombre, item);
+
+        // Siguiente línea
+        linea = strtok(NULL, "\r\n");
     }
 
-    fclose(file);
-}
-
-// Implementación de parseTipo
-TipoItem parseTipo(const char* tipoStr) {
-    if (strcasecmp(tipoStr, "COMIDA") == 0) return COMIDA;
-    if (strcasecmp(tipoStr, "ASPECTO") == 0) return ASPECTO;
-    // Valor por defecto si no coincide
-    return COMIDA;
+    UnloadFileText(texto);
 }
 
 void crearTienda(Escenario* escenario) {
-    escenario->tienda = createMap(100); //mapa para la tienda del escenario actual
-
-    // Cargar ítems de ejemplo
+    escenario->tienda = createMap(100);
     cargarItemsTienda(escenario->tienda);
+} 
+
+Array* cargarEscenarios(){
+    Array* escenarios = array_create(7);
+    char* texto = LoadFileText("resources/escenarios.csv");
+    char* linea = strtok(texto, "\r\n"); // Saltar encabezado   
+    linea = strtok(NULL, "\r\n");
+    while (linea != NULL) {
+        // Reservar escenario
+        Escenario* escenario = malloc(sizeof(Escenario));
+        escenario->nombreEscenario = NULL;
+        escenario->imagen_fondo = (Texture2D){ 0 };
+        escenario->tienda = NULL;
+
+        // Tokenizar los campos
+        char* nombre = strtok(linea, ",");
+        char* energiaStr = strtok(NULL, ",");
+        char* monedasStr = strtok(NULL, ",");
+        char* rutaFondo = strtok(NULL, ",");
+
+        // Copiar datos
+        escenario->nombreEscenario = strdup(nombre);
+        escenario->req_energia = atoi(energiaStr);
+        escenario->req_monedas = atoi(monedasStr);
+        
+        // Cargar imagen de fondo
+        if (rutaFondo && strlen(rutaFondo) > 0) {
+            Image img = LoadImage(rutaFondo);
+            ImageFlipVertical(&img); // Invertir imagen verticalmente
+            escenario->imagen_fondo = LoadTextureFromImage(img);
+            UnloadImage(img);
+        }
+
+        // Insertar al array de escenarios
+        array_push_back(escenarios, escenario);
+
+        // Siguiente línea
+        linea = strtok(NULL, "\r\n");
+    }
+    UnloadFileText(texto);
+    return escenarios;
 }
+

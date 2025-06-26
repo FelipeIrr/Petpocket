@@ -9,72 +9,6 @@
 #include "tdas/map.h"
 #include "tdas/array.h"
 
-//CREAR MASCOTA
-Mascota* crearMascota(Escenario* escenarioInicial) {
-    char nombreMascota[32] = "";
-    bool nombreIngresado = false;
-    bool textBoxEditMode = true;
-    Rectangle textBox = { 350, 300, 300, 50 };
-
-    SetMouseCursor(MOUSE_CURSOR_IBEAM);
-
-    while (!nombreIngresado && !WindowShouldClose()) {
-        if (CheckCollisionPointRec(GetMousePosition(), textBox)) {
-            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) textBoxEditMode = true;
-        } else {
-            if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) textBoxEditMode = false;
-        }
-
-        if (textBoxEditMode) {
-            int key = GetCharPressed();
-            while (key > 0) {
-                if ((key >= 32) && (key <= 125) && (strlen(nombreMascota) < 31)) {
-                    int len = strlen(nombreMascota);
-                    nombreMascota[len] = (char)key;
-                    nombreMascota[len + 1] = '\0';
-                }
-                key = GetCharPressed();
-            }
-
-            if (IsKeyPressed(KEY_BACKSPACE)) {
-                int len = strlen(nombreMascota);
-                if (len > 0) nombreMascota[len - 1] = '\0';
-            }
-
-            if (IsKeyPressed(KEY_ENTER) && strlen(nombreMascota) > 0) {
-                nombreIngresado = true;
-            }
-        }
-
-        //dibujo
-        BeginDrawing();
-            ClearBackground(RAYWHITE);
-            DrawText("Ingresa el nombre de tu mascota y presiona ENTER:", 250, 240, 20, DARKGRAY);
-            DrawRectangleRec(textBox, LIGHTGRAY);
-            DrawRectangleLinesEx(textBox, 1, GRAY);
-            DrawText(nombreMascota, (int)textBox.x + 5, (int)textBox.y + 15, 20, MAROON);
-
-            if (textBoxEditMode) DrawText("_", (int)textBox.x + 5 + MeasureText(nombreMascota, 20), (int)textBox.y + 15, 20, MAROON);
-        EndDrawing();
-    }
-
-    ClearBackground(RAYWHITE);
-
-    //Inicializa la mascota
-    Mascota* m = (Mascota*)malloc(sizeof(Mascota));
-    if (!m) return NULL;
-
-    m->nombre = strdup(nombreMascota);
-    m->energia = 100;
-    m->monedas = 0;
-    m->escenario_actual = escenarioInicial;
-    m->inventario = list_create();
-
-    SetMouseCursor(MOUSE_CURSOR_DEFAULT);
-
-    return m;
-}
-
 //FUNCIONES AUXILIARES DEL JUEGO
 //--------------------------------------------------------------------------------------------------------------------------------------
 
@@ -120,180 +54,90 @@ void alimentarMascota(Mascota* m) {
 }
 
 // AVANZAR DE ESCENARIO
-void cambiarEscenario(Mascota* mascota, Array* escenarios) {
+/*void cambiarEscenario(Mascota* mascota, Array* escenarios) {
     if (mascota->energia < 50) {
-        for (int i = 0; i < 90; i++) {
-            BeginDrawing();
-                ClearBackground(RAYWHITE);
-                DrawText("No tienes suficiente energía para cambiar de escenario.", 180, 280, 20, RED);
-            EndDrawing();
-        }
+        BeginDrawing();
+            ClearBackground(RAYWHITE);
+            DrawText("No tienes suficiente energía para cambiar de escenario (mínimo 50).", 100, 280, 20, RED);
+        EndDrawing();
         return;
     }
 
     int total = array_size(escenarios);
-    int seleccion = -1;
+    int indice = 0;
 
-    // Generar botones para cada escenario
-    Rectangle botones[total];
-    for (int i = 0; i < total; i++) {
-        botones[i] = (Rectangle){ 100, 120 + i * 60, 800, 40 };
-    }
+    while (!WindowShouldClose()) {
+        Escenario* e = (Escenario*)array_get(escenarios, indice);
 
-    while (seleccion == -1 && !WindowShouldClose()) {
+        Rectangle btnAceptar = { 200, 360, 180, 40 };
+        Rectangle btnSiguiente = { 500, 360, 180, 40 };
+
         Vector2 mouse = GetMousePosition();
+        bool aceptarPresionado = false;
+        bool siguientePresionado = false;
 
         BeginDrawing();
             ClearBackground(RAYWHITE);
-            DrawText("--- ESCENARIOS DISPONIBLES ---", 300, 40, 25, DARKBLUE);
 
-            for (int i = 0; i < total; i++) {
-                Escenario* e = (Escenario*)array_get(escenarios, i);
-                DrawRectangleRec(botones[i], LIGHTGRAY);
-                DrawRectangleLinesEx(botones[i], 1, GRAY);
-                DrawText(TextFormat("%d. %s (Energía: %d, Monedas: %d)", i + 1,
-                    e->nombreEscenario, e->req_energia, e->req_monedas),
-                    botones[i].x + 10, botones[i].y + 10, 20, BLACK);
+            DrawText("--- CAMBIO DE ESCENARIO ---", 300, 40, 25, DARKBLUE);
 
-                if (CheckCollisionPointRec(mouse, botones[i]) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-                    seleccion = i;
-                }
-            }
+            DrawText(TextFormat("Escenario: %s", e->nombreEscenario), 200, 120, 25, BLACK);
+            DrawText(TextFormat("Requiere Energía: %d", e->req_energia), 200, 170, 20, DARKGRAY);
+            DrawText(TextFormat("Requiere Monedas: %d", e->req_monedas), 200, 200, 20, DARKGRAY);
+
+            // Botón Aceptar
+            DrawRectangleRec(btnAceptar, LIGHTGRAY);
+            DrawRectangleLinesEx(btnAceptar, 1, GRAY);
+            DrawText("Aceptar", btnAceptar.x + 50, btnAceptar.y + 10, 20, BLACK);
+
+            // Botón Siguiente
+            DrawRectangleRec(btnSiguiente, LIGHTGRAY);
+            DrawRectangleLinesEx(btnSiguiente, 1, GRAY);
+            DrawText("Siguiente", btnSiguiente.x + 40, btnSiguiente.y + 10, 20, BLACK);
 
         EndDrawing();
-    }
 
-    if (seleccion < 0 || seleccion >= total) return;
-
-    Escenario* elegido = (Escenario*)array_get(escenarios, seleccion);
-
-    if (mascota->energia >= elegido->req_energia && mascota->monedas >= elegido->req_monedas) {
-        mascota->energia -= elegido->req_energia;
-        mascota->monedas -= elegido->req_monedas;
-        mascota->escenario_actual = elegido;
-
-        for (int i = 0; i < 90; i++) {
-            BeginDrawing();
-                ClearBackground(RAYWHITE);
-                DrawText(TextFormat("Escenario cambiado a: %s", elegido->nombreEscenario), 250, 280, 20, DARKGREEN);
-            EndDrawing();
-        }
-
-    } else {
-        for (int i = 0; i < 90; i++) {
-            BeginDrawing();
-                ClearBackground(RAYWHITE);
-                DrawText("No cumples los requisitos para este escenario.", 220, 280, 20, RED);
-            EndDrawing();
-        }
-    }
-}
-
-// ACCESO A TIENDA
-void tienda(Mascota* mascota) {
-    Map* tienda = mascota->escenario_actual->tienda;
-    Pair* pares[100]; // máximo 100 ítems en tienda
-    int total = 0;
-
-    // Obtener todos los ítems en la tienda
-    for (Pair* par = firstMap(tienda); par != NULL; par = nextMap(tienda)) {
-        pares[total++] = par;
-    }
-
-    Rectangle botones[total];
-    for (int i = 0; i < total; i++) {
-        botones[i] = (Rectangle){ 100, 120 + i * 60, 800, 50 };
-    }
-
-    int seleccion = -1;
-
-    while (seleccion == -1 && !WindowShouldClose()) {
-        Vector2 mouse = GetMousePosition();
-
-        BeginDrawing();
-        ClearBackground(RAYWHITE);
-
-        DrawText("--- TIENDA ---", 400, 40, 30, DARKBLUE);
-        DrawText(TextFormat("Monedas: %d", mascota->monedas), 40, 40, 20, DARKGRAY);
-
-        for (int i = 0; i < total; i++) {
-            Item* item = (Item*)pares[i]->value;
-
-            DrawRectangleRec(botones[i], LIGHTGRAY);
-            DrawRectangleLinesEx(botones[i], 2, GRAY);
-            DrawText(TextFormat("%s (tipo: %s, precio: %d)", item->nombre,
-                                item->tipo == COMIDA ? "Comida" : "Aspecto",
-                                item->precio),
-                     botones[i].x + 10, botones[i].y + 15, 20, BLACK);
-
-            if (CheckCollisionPointRec(mouse, botones[i]) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-                seleccion = i;
+        // Esperar clic
+        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+            if (CheckCollisionPointRec(mouse, btnAceptar)) {
+                aceptarPresionado = true;
+            }
+            if (CheckCollisionPointRec(mouse, btnSiguiente)) {
+                siguientePresionado = true;
             }
         }
 
-        EndDrawing();
-    }
+        // Procesar selección
+        if (aceptarPresionado) {
+            if (mascota->energia >= e->req_energia && mascota->monedas >= e->req_monedas) {
+                mascota->energia -= e->req_energia;
+                mascota->monedas -= e->req_monedas;
 
-    if (seleccion < 0 || seleccion >= total) return;
+                mascota->escenarioActual = e;
 
-    Item* item = (Item*)pares[seleccion]->value;
-
-    if (mascota->monedas < item->precio) {
-        for (int i = 0; i < 90; i++) {
-            BeginDrawing();
-            ClearBackground(RAYWHITE);
-            DrawText("No tienes suficientes monedas para comprar este ítem.", 180, 280, 20, RED);
-            EndDrawing();
+                // Confirmar cambio
+                
+                    BeginDrawing();
+                        ClearBackground(RAYWHITE);
+                        DrawText(TextFormat("Escenario cambiado a: %s", e->nombreEscenario), 200, 280, 20, DARKGREEN);
+                    EndDrawing();
+                
+                return; // Salir de la función al cambiar de escenario
+            } else {
+                
+                    BeginDrawing();
+                        ClearBackground(RAYWHITE);
+                        DrawText("No cumples los requisitos para este escenario.", 220, 280, 20, RED);
+                    EndDrawing();
+                
+            }
         }
-        return;
+
+        if (siguientePresionado) {
+            indice = (indice + 1) % total;
+        }
     }
-
-    mascota->monedas -= item->precio;
-    list_pushFront(mascota->inventario, item);
-}
-
-//----------------------------------------------------------------------------------------------------------------------------------------
-void cargarItemsTienda(Map* tienda) {
-    FILE* file = fopen("resources/items.csv", "r");
-    
-    char line[256];
-    fgets(line, sizeof(line), file); // Saltar encabezado
-
-    while (fgets(line, sizeof(line), file)) {
-        Item* item = malloc(sizeof(Item));
-        char* token = strtok(line, ",");
-        item->nombre = strdup(token);
-
-        token = strtok(NULL, ",");
-        item->tipo = parseTipo(token);
-
-        token = strtok(NULL, ",");
-        item->precio = atoi(token);
-
-        token = strtok(NULL, ",");
-        item->valor_energetico = atoi(token);
-
-        token = strtok(NULL, ",\n");
-        item->ruta_imagen = token ? strdup(token) : NULL;
-
-        if (item->tipo == ASPECTO && item->ruta_imagen)
-            item->aspecto = LoadTexture(item->ruta_imagen);
-        else
-            item->aspecto = (Texture2D){0};
-
-        insertMap(tienda, item->nombre, item);
-    }
-
-    fclose(file);
-}
-
-void crearTienda(Escenario* escenario) {
-    escenario->tienda = map_create(); //mapa para la tienda del escenario actual
-
-    // Cargar ítems de ejemplo
-    cargarItemsTienda(escenario->tienda);
-}
-
+} */
 
 
 
