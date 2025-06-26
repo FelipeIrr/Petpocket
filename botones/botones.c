@@ -72,19 +72,16 @@ Mascota* crearMascota() {
     m->energia = 100;
     m->monedas = 0;
     m->inventario = list_create();
-
-    SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+    m->aspecto_actual = LoadTexture("resources/yipeee!.png"); // Inicializar sin escenario
 
     return m;
 }
 
 void reiniciar(Mascota** mascota) {
-    if (reiniciar) {
-            list_clean((*mascota)->inventario);
-            free((*mascota)->nombre);
-            free(*mascota);
+    list_clean((*mascota)->inventario);
+    free((*mascota)->nombre);
+    free(*mascota);
 
-            // Crear nueva mascota con nombre temporal
-            *mascota = crearMascota();
-        }
+    // Crear nueva mascota con nombre temporal
+    *mascota = crearMascota();
 }

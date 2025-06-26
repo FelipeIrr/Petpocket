@@ -1,4 +1,5 @@
 #include "juego.h"
+#include "botones.h"
 #include "raylib.h"
 #include <stdio.h>
 #include <math.h>
@@ -17,11 +18,10 @@ typedef struct {
     bool hit;
 } Beat;
 
-void juegoRitmico() {
+void juegoRitmico(Mascota* mascota) {
 
         Texture2D metro = LoadTexture("resources/metro.png");
         Texture2D hitmark = LoadTexture("resources/hitmark.png");
-        Texture2D confeti = LoadTexture("resources/confeti.png");
 
         Music music = LoadMusicStream("resources/Nothing.wav");
         if (!IsMusicValid(music)) {
@@ -34,6 +34,7 @@ void juegoRitmico() {
         // Definir beatmap (segundos)
         float bpm = 188.0f; // Cambia esto al BPM de tu canción
         float songLength = GetMusicTimeLength(music);
+        int combo = 0; // Contador de combo
         int beatCount = (int)(songLength * bpm / 60.0f);
         if (beatCount > 512) beatCount = 512; // <-- Limita el número de beats
         Beat beatMap[512]; // Máximo 512 beats
@@ -59,6 +60,7 @@ void juegoRitmico() {
             // Permitir salir con Backspace
             if (IsKeyPressed(KEY_BACKSPACE)) {
                 salir = true;
+                mascota->monedas += score/1000; // Guarda las monedas ganadas
                 continue;
             }
 
@@ -99,23 +101,14 @@ void juegoRitmico() {
             if (barEffectTimer > 0) barEffectTimer--;
 
             // Dibuja la textura de confeti centrada y rotada en la zona de impacto
-            DrawTexturePro(
-                confeti,
-                (Rectangle){hitX, hitY, squareSize, squareSize },
-                (Rectangle){
-                    hitX - squareSize/2,
-                    hitY - squareSize/2,
-                    squareSize,
-                    squareSize
-                },
-                (Vector2){ squareSize/2, squareSize/2 },
-                squareAngle,
-                WHITE
-            );
+            // Mostrar confeti solo cuando hay acierto reciente (barEffectTimer > 0)
+            
+
 
             // Dibuja la zona de impacto (círculo gris)
             DrawCircle((int)hitX, (int)hitY, NOTE_SIZE, GRAY);
             DrawText("PRESIONA SPACE", SCREEN_WIDTH/2 - 80, 40, 20, RAYWHITE);
+            DrawText(TextFormat("Combo: %d", combo), 10, 50, 20, RAYWHITE);
             DrawText("PRESIONA BACKSPACE PARA SALIR", SCREEN_WIDTH/4 - 150, 600, 20, RAYWHITE);
 
             // Dibujar y chequear notas
@@ -154,6 +147,7 @@ void juegoRitmico() {
                         beatMap[i].hit = true;
                         score += (diff < 0.05f ? 300 : 100);
                         strcpy(feedbackText, diff < 0.05f ? "EXCELENTE!" : "Bien!");
+                        combo++;
                         feedbackTimer = 30;
                         barEffectTimer = 10; // Activa el efecto reactivo (tamaño)
                     }
@@ -162,6 +156,7 @@ void juegoRitmico() {
                 if (dt > 0.2f && !beatMap[i].hit) {
                     beatMap[i].hit = true;
                     strcpy(feedbackText, "Miss :(");
+                    combo = 0;
                     feedbackTimer = 30;
                     score -= 50;
                     if (score < 0) score = 0;
@@ -170,6 +165,7 @@ void juegoRitmico() {
 
             if (IsKeyPressed(KEY_SPACE) && !noteInRange) {
                 strcpy(feedbackText, "Muy Pronto!");
+                combo = 0;
                 feedbackTimer = 30;
                 score -= 30;
                 if (score < 0) score = 0;
@@ -186,7 +182,6 @@ void juegoRitmico() {
 
         UnloadTexture(metro);
         UnloadTexture(hitmark);
-        UnloadTexture(confeti);
         StopMusicStream(music);
         UnloadMusicStream(music);
 }

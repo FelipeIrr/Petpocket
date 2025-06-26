@@ -40,5 +40,6 @@ typedef struct Mascota {
 
 Mascota* crearMascota();
 
+void reiniciar(Mascota**);
 
 #endif
