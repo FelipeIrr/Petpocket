@@ -111,14 +111,16 @@ int main(void)
     //--------------------------------------------------------------------------------------
     Array* vectorEscenarios = cargarEscenarios(); 
     Mascota* Pocket = crearMascota(); 
-    Map* tiendas = createMap(100); 
+    crearTienda(array_get(vectorEscenarios, 0)); 
+    
+    /*Map* tiendas = createMap(100); 
     for (int i = 0; i < array_size(vectorEscenarios); i++) {
         Escenario* escenario = (Escenario*)array_get(vectorEscenarios, i);
         if (escenario->tienda == NULL) {
             crearTienda(escenario); 
         }
         insertMap(tiendas, escenario->nombreEscenario, escenario->tienda);
-    }
+    }*/
     
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
@@ -255,7 +257,7 @@ int main(void)
             else if (pantallaActual == MENU_TIENDA) {
                 DrawText("TIENDA", 20, 20, 30, ORANGE);
                 DrawText("Presiona Y para comprar", 20, 60, 20, PURPLE);
-                 // Muestra la tienda
+                mostrarTienda(Pocket, array_get(vectorEscenarios, 0)); 
                 DrawText("Presiona BACKSPACE para volver", 20, 60, 20, GRAY);
                 if (IsKeyPressed(KEY_BACKSPACE)) pantallaActual = MENU_PRINCIPAL;
             }
