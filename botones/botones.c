@@ -9,6 +9,8 @@
 #include "tdas/map.h"
 #include "tdas/array.h"
 
+// Declaración de la función parseTipo
+TipoItem parseTipo(const char* tipoStr);
 
 // Las definiciones de TipoItem, Item, Escenario y Mascota ya están en botones.h
 
@@ -167,12 +169,15 @@ void mostrarTienda(Mascota* mascota, Escenario* escenario) {
 // Cargar datos del csv
 void cargarItemsTienda(Map* tienda) {
     FILE* file = fopen("resources/items.csv", "r");
-    
+    if (!file) return;
+
     char line[256];
     fgets(line, sizeof(line), file); // Saltar encabezado
 
     while (fgets(line, sizeof(line), file)) {
         Item* item = malloc(sizeof(Item));
+        if (!item) continue;
+
         char* token = strtok(line, ",");
         item->nombre = strdup(token);
 
@@ -199,8 +204,16 @@ void cargarItemsTienda(Map* tienda) {
     fclose(file);
 }
 
+// Implementación de parseTipo
+TipoItem parseTipo(const char* tipoStr) {
+    if (strcasecmp(tipoStr, "COMIDA") == 0) return COMIDA;
+    if (strcasecmp(tipoStr, "ASPECTO") == 0) return ASPECTO;
+    // Valor por defecto si no coincide
+    return COMIDA;
+}
+
 void crearTienda(Escenario* escenario) {
-    escenario->tienda = map_create(); //mapa para la tienda del escenario actual
+    escenario->tienda = createMap(100); //mapa para la tienda del escenario actual
 
     // Cargar ítems de ejemplo
     cargarItemsTienda(escenario->tienda);

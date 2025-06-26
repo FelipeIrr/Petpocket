@@ -245,6 +245,9 @@ int main(void)
             }
             else if (pantallaActual == MENU_TIENDA) {
                 DrawText("TIENDA", 20, 20, 30, ORANGE);
+                DrawText("Presiona Y para comprar", 20, 60, 20, PURPLE);
+                crearTienda(Pocket->escenario_actual); // Crea la tienda 
+                mostrarTienda(Pocket, Pocket->escenario_actual->tienda); // Muestra la tienda
                 DrawText("Presiona BACKSPACE para volver", 20, 60, 20, GRAY);
                 if (IsKeyPressed(KEY_BACKSPACE)) pantallaActual = MENU_PRINCIPAL;
             }
