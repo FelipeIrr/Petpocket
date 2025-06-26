@@ -40,6 +40,7 @@ int main(void)
     InitWindow(screenWidth, screenHeight, "PetPocket Mascota Personal");
 
     InitAudioDevice();      // Initialize audio device
+    SetMasterVolume(0.5f);  // Set master volume to 50%
 
     Sound fxButton = LoadSound("resources/buttonfx.wav");   // Load button sound
     Texture2D button = LoadTexture("resources/test.png"); // Load button texture
@@ -68,7 +69,6 @@ int main(void)
     ImageFlipVertical(&fondoImg); // Invierte la imagen verticalmente
     Texture2D fondo = LoadTextureFromImage(fondoImg);
     UnloadImage(fondoImg);
-    Texture2D imagen2D = LoadTexture("resources/yipeee!.png"); // Imagen central
 
     // Crea un plano 3D para el fondo
     Model fondoModel = LoadModelFromMesh(GenMeshPlane(20, 30, 1, 1));
@@ -110,7 +110,7 @@ int main(void)
     SetTargetFPS(60);
     //--------------------------------------------------------------------------------------
     Mascota* Pocket = crearMascota();
-    
+
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
@@ -148,7 +148,7 @@ int main(void)
                 rlDisableBackfaceCulling();
                 DrawModel(skyboxModel, (Vector3){0,0,0}, 1.0f, WHITE);
                 rlEnableBackfaceCulling();
-                DrawBillboard(camera, imagen2D, (Vector3){0,1,0}, 2.0f, WHITE);
+                DrawBillboard(camera, Pocket->aspecto_actual, (Vector3){0,0.8,0}, 2.0f, WHITE);
                 DrawModel(Piso, (Vector3){0,0,0}, 1.0f, WHITE);
                 DrawModelEx(guitarra, (Vector3){3,1,0}, (Vector3){-4,4,1}, 45.0f, (Vector3){2,2,2}, WHITE);
             EndMode3D();
@@ -156,27 +156,33 @@ int main(void)
             // --- Interfaz 2D según menú ---
             if (pantallaActual == MENU_PRINCIPAL) {
                 DrawText("MENU PRINCIPAL", 20, 20, 30, DARKBLUE);
+                DrawText(TextFormat("Monedas: %d", Pocket->monedas), 20, 60, 20, GOLD);
+                DrawText(TextFormat("Energia: %d/100", Pocket->energia), 20, 90, 20, GOLD);
+                DrawText(TextFormat("Nombre: %s", Pocket->nombre), 20, 120, 20, GOLD);
+                // Dibuja un marco semitransparente detrás de los textos de monedas, energía y nombre
+                DrawRectangle(10, 10, 320, 140, Fade(BLACK, 0.2f)); // Marco/fondo para info
                 for (int i = 0; i < NUM_BUTTONS; i++) {
                     sourceRec.y = btnState[i]*frameHeight;
                     DrawTextureRec(buttonTextures[i], sourceRec, (Vector2){ btnBounds[i].x, btnBounds[i].y }, WHITE);
 
                     if (btnAction[i]) {
                         PlaySound(fxButton);
-                        if (i == 0) pantallaActual = MENU_COMIDA;        // Botón 1: COMIDA
-                        else if (i == 1) pantallaActual = MENU_JUEGO;   // Botón 2: JUEGO
-                        else if (i == 2) pantallaActual = MENU_LUGARES; // Botón 3: LUGARES
-                        else if (i == 3) pantallaActual = MENU_TIENDA;    // Botón 4: TIENDA
-                        else if (i == 4) pantallaActual = MENU_ACCESORIOS;    // Botón 5: ACCESORIOS
-                        else if (i == 5) pantallaActual = MENU_CONFIG;   // Botón 6: CONFIGURACION
+                        if (i == 0) pantallaActual = MENU_COMIDA;           // Botón 1: COMIDA
+                        else if (i == 1) pantallaActual = MENU_JUEGO;       // Botón 2: JUEGO
+                        else if (i == 2) pantallaActual = MENU_LUGARES;     // Botón 3: LUGARES
+                        else if (i == 3) pantallaActual = MENU_TIENDA;      // Botón 4: TIENDA
+                        else if (i == 4) pantallaActual = MENU_ACCESORIOS;  // Botón 5: ACCESORIOS
+                        else if (i == 5) pantallaActual = MENU_CONFIG;      // Botón 6: CONFIGURACION
                     }
                 }
             }
             else if (pantallaActual == MENU_JUEGO) {
                 DrawText("JUEGO", 20, 20, 30, DARKGREEN);
-                DrawText("Presiona Y para jugar", 20, 60, 20, GRAY);
+                DrawText("Presiona Y para jugar", 20, 60, 20, PURPLE);
+                DrawText("Score/100 = Monedas", 20, 80, 20, PURPLE);
                 DrawText("Presiona BACKSPACE para volver", 20, 100, 20, GRAY);
                 if (IsKeyPressed(KEY_Y)) {
-                    juegoRitmico(); // Llama a la función del juego
+                    juegoRitmico(Pocket); // Llama a la función del juego
                 }
                 if (IsKeyPressed(KEY_BACKSPACE)) pantallaActual = MENU_PRINCIPAL;
             }
@@ -197,22 +203,21 @@ int main(void)
                 }
 
                 // Cambiar nombre
-                static char nuevoNombre[32] = "y";
                 DrawText("Nombre:", 40, 170, 20, BLACK);
                 DrawRectangle(120, 170, 150, 30, WHITE);
-                DrawText(nuevoNombre, 125, 175, 20, DARKGRAY);
+                DrawText(Pocket->nombre, 125, 175, 20, DARKGRAY);
                 int key = GetCharPressed();
                 while (key > 0) {
-                    int len = strlen(nuevoNombre);
+                    int len = strlen(Pocket->nombre);
                     if (key >= 32 && key <= 125 && len < 31) {
-                        nuevoNombre[len] = (char)key;
-                        nuevoNombre[len + 1] = '\0';
+                        Pocket->nombre[len] = (char)key;
+                        Pocket->nombre[len + 1] = '\0';
                     }
                     key = GetCharPressed();
                 }
                 if (IsKeyPressed(KEY_BACKSPACE)) {
-                    int len = strlen(nuevoNombre);
-                    if (len > 0) nuevoNombre[len - 1] = '\0';
+                    int len = strlen(Pocket->nombre);
+                    if (len > 0) Pocket->nombre[len - 1] = '\0';
                 }
                 // Aquí deberías guardar el nombre en la estructura de la mascota si la tienes
 
@@ -220,8 +225,7 @@ int main(void)
                 DrawRectangle(40, 220, 120, 40, ORANGE);
                 DrawText("Reiniciar", 60, 230, 20, WHITE);
                 if (CheckCollisionPointRec(GetMousePosition(), (Rectangle){40, 220, 120, 40}) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-                    // Reiniciar lógica: puedes recargar variables, reiniciar el juego, etc.
-                    // Por ejemplo, podrías volver al menú principal:
+                    reiniciar(&Pocket); // Reinicia la mascota
                     pantallaActual = MENU_PRINCIPAL;
                     // Y reiniciar otras variables del juego aquí
                 }
@@ -266,7 +270,9 @@ int main(void)
     }
     UnloadSound(fxButton);  // Unload sound
     UnloadTexture(fondo);
-    UnloadTexture(imagen2D);
+    UnloadTexture(Pocket->aspecto_actual); // Unload pet texture
+    free(Pocket->nombre); // Free the pet name string
+    UnloadModel(guitarra); // Unload the guitar model
     UnloadModel(fondoModel);
     UnloadModel(skyboxModel);
 

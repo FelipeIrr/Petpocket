@@ -9,37 +9,6 @@
 #include "tdas/map.h"
 #include "tdas/array.h"
 
-
-typedef enum {
-    COMIDA,
-    ASPECTO
-} TipoItem;
-
-typedef struct Item {
-    char* nombre;        
-    TipoItem tipo; 
-    int precio;
-    int valor_energetico;
-    Texture2D aspecto;  // si es tipo aspecto  
-} Item;
-
-typedef struct Escenario {
-    char* nombreEscenario;
-    Texture2D imagen_fondo;
-    int req_energia;
-    int req_monedas;
-    Map* tienda; //Mapa para la tienda
-} Escenario;
-
-typedef struct Mascota {
-    char* nombre;
-    int energia;
-    int monedas;
-    Escenario* escenario_actual;
-    List* inventario; // ítems en inventario
-} Mascota;
-
-
 //CREAR MASCOTA
 Mascota* crearMascota(Escenario* escenarioInicial) {
     char nombreMascota[32] = "";
@@ -281,23 +250,12 @@ void tienda(Mascota* mascota) {
 
     mascota->monedas -= item->precio;
     list_pushFront(mascota->inventario, item);
-
-    for (int i = 0; i < 90; i++) {
-        BeginDrawing();
-        ClearBackground(RAYWHITE);
-        DrawText(TextFormat("Compraste %s", item->nombre), 300, 280, 20, DARKGREEN);
-        DrawText(TextFormat("Monedas restantes: %d", mascota->monedas), 300, 310, 20, DARKGREEN);
-        EndDrawing();
-    }
 }
+
 //----------------------------------------------------------------------------------------------------------------------------------------
 void cargarItemsTienda(Map* tienda) {
     FILE* file = fopen("resources/items.csv", "r");
-    if (!file) {
-        printf("No se pudo abrir el archivo items.csv\n");
-        return;
-    }
-
+    
     char line[256];
     fgets(line, sizeof(line), file); // Saltar encabezado
 

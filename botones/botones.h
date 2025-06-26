@@ -18,6 +18,7 @@ typedef struct Item {
     int precio;
     int valor_energetico;
     Texture2D aspecto;  // si es tipo aspecto  
+    char* ruta_imagen; // Ruta de la imagen del ítem
 } Item;
 
 typedef struct Escenario {
@@ -32,7 +33,6 @@ typedef struct Mascota {
     char* nombre;
     int energia;
     int monedas;
-    Escenario* escenario_actual;
     List* inventario; // ítems en inventario
     Texture2D aspecto_actual;
 } Mascota;
@@ -40,5 +40,6 @@ typedef struct Mascota {
 
 Mascota* crearMascota();
 
+void reiniciar(Mascota**);
 
 #endif
