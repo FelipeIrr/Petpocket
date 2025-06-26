@@ -53,14 +53,13 @@ void alimentarMascota(Mascota* m) {
     }
 }
 
-// AVANZAR DE ESCENARIO
-/*void cambiarEscenario(Mascota* mascota, Array* escenarios) {
+
+void cambiarEscenario(Mascota* mascota, Array* escenarios) {
     if (mascota->energia < 50) {
         BeginDrawing();
             ClearBackground(RAYWHITE);
             DrawText("No tienes suficiente energía para cambiar de escenario (mínimo 50).", 100, 280, 20, RED);
         EndDrawing();
-        return;
     }
 
     int total = array_size(escenarios);
@@ -95,7 +94,14 @@ void alimentarMascota(Mascota* m) {
             DrawRectangleLinesEx(btnSiguiente, 1, GRAY);
             DrawText("Siguiente", btnSiguiente.x + 40, btnSiguiente.y + 10, 20, BLACK);
 
+            DrawText("Presiona ESC o BACKSPACE para salir", 270, 420, 18, DARKGRAY);
+
         EndDrawing();
+
+        // Salir si se presiona BACKSPACE
+        if (IsKeyPressed(KEY_BACKSPACE)) {
+            break;
+        }
 
         // Esperar clic
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
@@ -112,24 +118,19 @@ void alimentarMascota(Mascota* m) {
             if (mascota->energia >= e->req_energia && mascota->monedas >= e->req_monedas) {
                 mascota->energia -= e->req_energia;
                 mascota->monedas -= e->req_monedas;
-
                 mascota->escenarioActual = e;
 
                 // Confirmar cambio
-                
-                    BeginDrawing();
-                        ClearBackground(RAYWHITE);
-                        DrawText(TextFormat("Escenario cambiado a: %s", e->nombreEscenario), 200, 280, 20, DARKGREEN);
-                    EndDrawing();
-                
+                BeginDrawing();
+                    ClearBackground(RAYWHITE);
+                    DrawText(TextFormat("Escenario cambiado a: %s", e->nombreEscenario), 200, 280, 20, DARKGREEN);
+                EndDrawing();
                 return; // Salir de la función al cambiar de escenario
             } else {
-                
-                    BeginDrawing();
-                        ClearBackground(RAYWHITE);
-                        DrawText("No cumples los requisitos para este escenario.", 220, 280, 20, RED);
-                    EndDrawing();
-                
+                BeginDrawing();
+                    ClearBackground(RAYWHITE);
+                    DrawText("No cumples los requisitos para este escenario.", 220, 280, 20, RED);
+                EndDrawing();
             }
         }
 
@@ -137,7 +138,7 @@ void alimentarMascota(Mascota* m) {
             indice = (indice + 1) % total;
         }
     }
-} */
+}
 
 
 
