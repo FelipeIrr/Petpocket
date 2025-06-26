@@ -40,6 +40,7 @@ int main(void)
     InitWindow(screenWidth, screenHeight, "PetPocket Mascota Personal");
 
     InitAudioDevice();      // Initialize audio device
+    SetMasterVolume(0.5f);  // Set master volume to 50%
 
     Sound fxButton = LoadSound("resources/buttonfx.wav");   // Load button sound
     Texture2D button = LoadTexture("resources/test.png"); // Load button texture

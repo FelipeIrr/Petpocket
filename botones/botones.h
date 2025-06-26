@@ -32,7 +32,6 @@ typedef struct Mascota {
     char* nombre;
     int energia;
     int monedas;
-    Escenario* escenario_actual;
     List* inventario; // ítems en inventario
     Texture2D aspecto_actual;
 } Mascota;

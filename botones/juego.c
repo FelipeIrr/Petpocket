@@ -98,17 +98,22 @@ void juegoRitmico(Mascota* mascota) {
             // Tamaño y color del cuadrado según efecto
             float baseSize = NOTE_SIZE * 2;
             float squareSize = baseSize + (barEffectTimer > 0 ? NOTE_SIZE * 1.5f : 0);
+            Color squareColor = (barEffectTimer > 0) ? GREEN : YELLOW;
             if (barEffectTimer > 0) barEffectTimer--;
 
-            // Dibuja la textura de confeti centrada y rotada en la zona de impacto
-            // Mostrar confeti solo cuando hay acierto reciente (barEffectTimer > 0)
-            
+            // Dibuja el cuadrado centrado y rotado en su propio eje en la zona de impacto
 
+            DrawRectanglePro(
+                (Rectangle){ hitX, hitY, squareSize, squareSize },
+                (Vector2){ squareSize/2, squareSize/2 },
+                squareAngle,
+                squareColor
+            );
 
             // Dibuja la zona de impacto (círculo gris)
             DrawCircle((int)hitX, (int)hitY, NOTE_SIZE, GRAY);
             DrawText("PRESIONA SPACE", SCREEN_WIDTH/2 - 80, 40, 20, RAYWHITE);
-            DrawText(TextFormat("Combo: %d", combo), 10, 50, 20, RAYWHITE);
+            DrawText(TextFormat("Combo: %d", combo), SCREEN_WIDTH/2.2, SCREEN_HEIGHT/2.5, 20, RAYWHITE);
             DrawText("PRESIONA BACKSPACE PARA SALIR", SCREEN_WIDTH/4 - 150, 600, 20, RAYWHITE);
 
             // Dibujar y chequear notas
@@ -171,7 +176,7 @@ void juegoRitmico(Mascota* mascota) {
                 if (score < 0) score = 0;
             }
 
-            DrawText(TextFormat("Puntuacion: %04i", score), 10, 10, 24, GREEN);
+            DrawText(TextFormat("Puntuacion: %04i", score), SCREEN_WIDTH/2.5, SCREEN_HEIGHT/2, 24, GREEN);
             if (feedbackTimer > 0) {
                 DrawText(feedbackText, SCREEN_WIDTH/2 - MeasureText(feedbackText, 24)/2, 80, 24, YELLOW);
                 feedbackTimer--;
