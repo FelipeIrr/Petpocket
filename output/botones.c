@@ -291,98 +291,51 @@ void tienda(Mascota* mascota) {
     }
 }
 //----------------------------------------------------------------------------------------------------------------------------------------
-
-
-//OPCIONES DEL JUEGO
-void opcionesDelSistema(Mascota** mascota, Escenario* escenario_inicial) {
-    bool cambiarNombre = false;
-    bool reiniciar = false;
-    bool escribiendo = false;
-    char nuevoNombre[50] = "\0";
-    int letraPos = 0;
-
-    while (!WindowShouldClose()) {
-        BeginDrawing();
-        ClearBackground(RAYWHITE);
-
-        DrawText("--- OPCIONES DEL SISTEMA ---", 250, 100, 25, DARKBLUE);
-        DrawRectangle(270, 180, 280, 40, LIGHTGRAY);
-        DrawRectangle(270, 240, 280, 40, LIGHTGRAY);
-        DrawText("1. Cambiar nombre de la mascota", 280, 190, 20, BLACK);
-        DrawText("2. Reiniciar partida", 280, 250, 20, BLACK);
-
-        // Si se está escribiendo un nuevo nombre
-        if (escribiendo) {
-            DrawText("Nuevo nombre:", 300, 320, 20, BLACK);
-            DrawRectangle(300, 350, 300, 40, WHITE);
-            DrawText(nuevoNombre, 310, 360, 20, BLUE);
-        }
-
-        EndDrawing();
-
-        // Manejo de botones por click
-        if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-            Vector2 mouse = GetMousePosition();
-            if (CheckCollisionPointRec(mouse, (Rectangle){270, 180, 280, 40})) {
-                cambiarNombre = true;
-                escribiendo = true;
-                memset(nuevoNombre, 0, sizeof(nuevoNombre));
-                letraPos = 0;
-            }
-            if (CheckCollisionPointRec(mouse, (Rectangle){270, 240, 280, 40})) {
-                reiniciar = true;
-            }
-        }
-
-        // Captura de texto para nombre
-        if (escribiendo) {
-            int key = GetCharPressed();
-            while (key > 0) {
-                if ((key >= 32) && (key <= 125) && letraPos < 49) {
-                    nuevoNombre[letraPos++] = (char)key;
-                    nuevoNombre[letraPos] = '\0';
-                }
-                key = GetCharPressed();
-            }
-
-            if (IsKeyPressed(KEY_BACKSPACE) && letraPos > 0) {
-                letraPos--;
-                nuevoNombre[letraPos] = '\0';
-            }
-
-            if (IsKeyPressed(KEY_ENTER)) {
-                free((*mascota)->nombre);
-                (*mascota)->nombre = strdup(nuevoNombre);
-                escribiendo = false;
-
-                for (int i = 0; i < 90; i++) {
-                    BeginDrawing();
-                    ClearBackground(RAYWHITE);
-                    DrawText("Nombre cambiado exitosamente.", 250, 280, 20, DARKGREEN);
-                    EndDrawing();
-                }
-                break;
-            }
-        }
-
-        if (reiniciar) {
-            list_clean((*mascota)->inventario);
-            free((*mascota)->nombre);
-            free(*mascota);
-
-            // Crear nueva mascota con nombre temporal
-            strcpy(nuevoNombre, "Nueva Mascota");
-            *mascota = crearMascota((*mascota)->escenario_actual);
-
-            for (int i = 0; i < 90; i++) {
-                BeginDrawing();
-                ClearBackground(RAYWHITE);
-                DrawText("Partida reiniciada.", 280, 280, 20, DARKGREEN);
-                EndDrawing();
-            }
-            break;
-        }
+void cargarItemsTienda(Map* tienda) {
+    FILE* file = fopen("resources/items.csv", "r");
+    if (!file) {
+        printf("No se pudo abrir el archivo items.csv\n");
+        return;
     }
+
+    char line[256];
+    fgets(line, sizeof(line), file); // Saltar encabezado
+
+    while (fgets(line, sizeof(line), file)) {
+        Item* item = malloc(sizeof(Item));
+        char* token = strtok(line, ",");
+        item->nombre = strdup(token);
+
+        token = strtok(NULL, ",");
+        item->tipo = parseTipo(token);
+
+        token = strtok(NULL, ",");
+        item->precio = atoi(token);
+
+        token = strtok(NULL, ",");
+        item->valor_energetico = atoi(token);
+
+        token = strtok(NULL, ",\n");
+        item->ruta_imagen = token ? strdup(token) : NULL;
+
+        if (item->tipo == ASPECTO && item->ruta_imagen)
+            item->aspecto = LoadTexture(item->ruta_imagen);
+        else
+            item->aspecto = (Texture2D){0};
+
+        insertMap(tienda, item->nombre, item);
+    }
+
+    fclose(file);
 }
+
+void crearTienda(Escenario* escenario) {
+    escenario->tienda = map_create(); //mapa para la tienda del escenario actual
+
+    // Cargar ítems de ejemplo
+    cargarItemsTienda(escenario->tienda);
+}
+
+
 
 
