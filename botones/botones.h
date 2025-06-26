@@ -18,6 +18,7 @@ typedef struct Item {
     int precio;
     int valor_energetico;
     Texture2D aspecto;  // si es tipo aspecto  
+    char* ruta_imagen; // Ruta de la imagen del ítem
 } Item;
 
 typedef struct Escenario {
@@ -40,5 +41,13 @@ typedef struct Mascota {
 Mascota* crearMascota();
 
 void reiniciar(Mascota**);
+
+Array* cargarEscenarios();
+
+void cargarItemsTienda(Map* tienda);
+
+void crearTienda(Escenario* escenario);
+
+void mostrarTienda(Mascota* mascota, Escenario* escenario);
 
 #endif

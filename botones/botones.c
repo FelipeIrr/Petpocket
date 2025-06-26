@@ -9,12 +9,13 @@
 #include "tdas/map.h"
 #include "tdas/array.h"
 
+// Declaración de la función parseTipo
+TipoItem parseTipo(const char* tipoStr);
 
 // Las definiciones de TipoItem, Item, Escenario y Mascota ya están en botones.h
 
-
 //CREAR MASCOTA
-Mascota* crearMascota() {
+Mascota* crearMascota() { //Escenario* escenario) 
     char nombreMascota[32] = "";
     bool nombreIngresado = false;
     bool textBoxEditMode = true;
@@ -73,6 +74,7 @@ Mascota* crearMascota() {
     m->monedas = 0;
     m->inventario = list_create();
     m->aspecto_actual = LoadTexture("resources/yipeee!.png"); // Inicializar sin escenario
+    //m->escenario_actual =  //TESTING
 
     return m;
 }
@@ -83,5 +85,175 @@ void reiniciar(Mascota** mascota) {
     free(*mascota);
 
     // Crear nueva mascota con nombre temporal
-    *mascota = crearMascota();
+    *mascota = crearMascota(); //agregar escenario
 }
+
+void mostrarTienda(Mascota* mascota, Escenario* escenario) {
+    Map* tienda = escenario->tienda;
+    int total = map_size(tienda);
+    if (total == 0) return;
+
+    // Crear arreglo de botones para la selección visual
+    Rectangle* botones = malloc(sizeof(Rectangle) * total);
+    int seleccion = -1;
+
+    // Recorrer el mapa y mostrar los ítems
+    int idx = 0;
+    for (Pair* p = firstMap(tienda); p != NULL; p = nextMap(tienda)) {
+        botones[idx] = (Rectangle){ 120, 100 + idx * 70, 700, 60 };
+        idx++;
+    }
+
+    while (seleccion == -1 && !WindowShouldClose()) {
+        Vector2 mouse = GetMousePosition();
+
+        BeginDrawing();
+        ClearBackground(RAYWHITE);
+
+        DrawText("--- TIENDA ---", 400, 40, 30, DARKBLUE);
+        DrawText(TextFormat("Monedas: %d", mascota->monedas), 40, 40, 20, DARKGRAY);
+
+        int i = 0;
+        for (Pair* p = firstMap(tienda); p != NULL; p = nextMap(tienda)) {
+            Item* item = (Item*)p->value;
+            DrawRectangleRec(botones[i], LIGHTGRAY);
+            DrawRectangleLinesEx(botones[i], 2, GRAY);
+            DrawText(TextFormat("%s (precio: %d)", item->nombre, item->precio),
+                     botones[i].x + 10, botones[i].y + 15, 20, BLACK);
+
+            if (CheckCollisionPointRec(mouse, botones[i]) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                seleccion = i;
+            }
+            i++;
+        }
+
+        EndDrawing();
+    }
+
+    // Selección y compra
+    if (seleccion < 0 || seleccion >= total) {
+        free(botones);
+        return;
+    }
+
+    // Buscar el ítem seleccionado
+    int i = 0;
+    Item* itemSeleccionado = NULL;
+    for (Pair* p = firstMap(tienda); p != NULL; p = nextMap(tienda)) {
+        if (i == seleccion) {
+            itemSeleccionado = (Item*)p->value;
+            break;
+        }
+        i++;
+    }
+
+    if (!itemSeleccionado) {
+        free(botones);
+        return;
+    }
+
+    if (mascota->monedas < itemSeleccionado->precio) {
+        BeginDrawing();
+        ClearBackground(RAYWHITE);
+        DrawText("No tienes suficientes monedas para comprar este ítem.", 180, 280, 20, RED);
+        EndDrawing();
+        free(botones);
+        return;
+    }
+
+    mascota->monedas -= itemSeleccionado->precio;
+    list_pushFront(mascota->inventario, itemSeleccionado);
+
+    free(botones);
+    return;
+} 
+
+void cargarItemsTienda(Map* tienda) {
+    char* texto = LoadFileText("resources/items.csv");
+    
+    char* linea = strtok(texto, "\r\n"); // Saltar encabezado
+    linea = strtok(NULL, "\r\n");
+
+    while (linea != NULL) {
+        // Reservar ítem
+        Item* item = malloc(sizeof(Item));
+        item->ruta_imagen = NULL;
+        item->nombre = NULL;
+
+        // Tokenizar los campos
+        char* nombre = strtok(linea, ",");
+        char* tipo = strtok(NULL, ",");
+        char* precioStr = strtok(NULL, ",");
+        char* valorStr = strtok(NULL, ",");
+        char* ruta = strtok(NULL, ",");
+
+        // Copiar datos
+        item->nombre = strdup(nombre);
+        item->tipo = (strcmp(tipo, "COMIDA") == 0) ? COMIDA : ASPECTO;
+        item->precio = atoi(precioStr);
+        item->valor_energetico = atoi(valorStr);
+
+        // Si es aspecto, cargar textura y guardar ruta
+        if (item->tipo == ASPECTO && ruta && strlen(ruta) > 0) {
+            item->ruta_imagen = strdup(ruta);
+            item->aspecto = LoadTexture(item->ruta_imagen);
+        } else {
+            item->aspecto = (Texture2D){ 0 };
+        }
+
+        // Insertar al mapa con clave el nombre
+        insertMap(tienda, item->nombre, item);
+
+        // Siguiente línea
+        linea = strtok(NULL, "\r\n");
+    }
+
+    UnloadFileText(texto);
+}
+
+void crearTienda(Escenario* escenario) {
+    escenario->tienda = createMap(100);
+    cargarItemsTienda(escenario->tienda);
+} 
+
+Array* cargarEscenarios(){
+    Array* escenarios = array_create(7);
+    char* texto = LoadFileText("resources/escenarios.csv");
+    char* linea = strtok(texto, "\r\n"); // Saltar encabezado   
+    linea = strtok(NULL, "\r\n");
+    while (linea != NULL) {
+        // Reservar escenario
+        Escenario* escenario = malloc(sizeof(Escenario));
+        escenario->nombreEscenario = NULL;
+        escenario->imagen_fondo = (Texture2D){ 0 };
+        escenario->tienda = NULL;
+
+        // Tokenizar los campos
+        char* nombre = strtok(linea, ",");
+        char* energiaStr = strtok(NULL, ",");
+        char* monedasStr = strtok(NULL, ",");
+        char* rutaFondo = strtok(NULL, ",");
+
+        // Copiar datos
+        escenario->nombreEscenario = strdup(nombre);
+        escenario->req_energia = atoi(energiaStr);
+        escenario->req_monedas = atoi(monedasStr);
+        
+        // Cargar imagen de fondo
+        if (rutaFondo && strlen(rutaFondo) > 0) {
+            Image img = LoadImage(rutaFondo);
+            ImageFlipVertical(&img); // Invertir imagen verticalmente
+            escenario->imagen_fondo = LoadTextureFromImage(img);
+            UnloadImage(img);
+        }
+
+        // Insertar al array de escenarios
+        array_push_back(escenarios, escenario);
+
+        // Siguiente línea
+        linea = strtok(NULL, "\r\n");
+    }
+    UnloadFileText(texto);
+    return escenarios;
+}
+

@@ -1,0 +1,9 @@
+nombre,energia,monedas,ruta_fondo
+escenario1,0,0,resources/escenario1.png
+escenario2,10,10,resources/escenario2.png
+escenario3,20,20,resources/escenario3.png
+escenario4,30,30,resources/escenario4.png   
+escenario5,40,40,resources/escenario5.png
+escenario6,50,50,resources/escenario6.png
+escenario7,60,60,resources/escenario7.png
+
