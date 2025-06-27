@@ -92,19 +92,56 @@ void mostrarTienda(Mascota* mascota, Escenario* escenario) {
     int total = map_size(tienda);
     if (total == 0) return;
 
+    // --- Crear arreglo de punteros a ítems para ordenar ---
+    Item** items = malloc(sizeof(Item*) * total);
+    int idx = 0;
+    for (Pair* p = firstMap(tienda); p != NULL; p = nextMap(tienda)) {
+        items[idx++] = (Item*)p->value;
+    }
+
+    // --- Ordenar de menor a mayor precio ---
+    for (int i = 0; i < total - 1; i++) {
+        for (int j = i + 1; j < total; j++) {
+            if (items[i]->precio > items[j]->precio) {
+                Item* tmp = items[i];
+                items[i] = items[j];
+                items[j] = tmp;
+            }
+        }
+    }
+
     // Crear arreglo de botones para la selección visual
     Rectangle* botones = malloc(sizeof(Rectangle) * total);
     int seleccion = -1;
+    bool salir = false;
 
-    // Recorrer el mapa y mostrar los ítems
-    int idx = 0;
-    for (Pair* p = firstMap(tienda); p != NULL; p = nextMap(tienda)) {
-        botones[idx] = (Rectangle){ 120, 100 + idx * 70, 700, 60 };
-        idx++;
+    // Crear arreglo para contar cuántos de cada item tiene la mascota
+    int* contadores = calloc(total, sizeof(int));
+
+    // Llenar los contadores revisando el inventario de la mascota
+    for (int i = 0; i < total; i++) {
+        int cuenta = 0;
+        for (Item* itemInv = list_first(mascota->inventario); itemInv != NULL; itemInv = list_next(mascota->inventario)) {
+            if (strcmp(items[i]->nombre, itemInv->nombre) == 0) cuenta++;
+        }
+        contadores[i] = cuenta;
+        botones[i] = (Rectangle){ 120, 100 + i * 70, 700, 60 };
     }
 
-    while (seleccion == -1 && !WindowShouldClose()) {
+    // --- Scroll variables ---
+    int scrollY = 0;
+    int maxScroll = (total * 70) - (GetScreenHeight() - 120);
+    if (maxScroll < 0) maxScroll = 0;
+
+    bool mouseReleased = true;
+    while (!WindowShouldClose() && !salir && seleccion == -1) {
         Vector2 mouse = GetMousePosition();
+
+        // --- Scroll con rueda del mouse ---
+        int wheel = GetMouseWheelMove();
+        scrollY -= wheel * 30;
+        if (scrollY < 0) scrollY = 0;
+        if (scrollY > maxScroll) scrollY = maxScroll;
 
         BeginDrawing();
         ClearBackground(RAYWHITE);
@@ -112,51 +149,123 @@ void mostrarTienda(Mascota* mascota, Escenario* escenario) {
         DrawText("--- TIENDA ---", 400, 40, 30, DARKBLUE);
         DrawText(TextFormat("Monedas: %d", mascota->monedas), 40, 40, 20, DARKGRAY);
 
-        int i = 0;
-        for (Pair* p = firstMap(tienda); p != NULL; p = nextMap(tienda)) {
-            Item* item = (Item*)p->value;
-            DrawRectangleRec(botones[i], LIGHTGRAY);
-            DrawRectangleLinesEx(botones[i], 2, GRAY);
-            DrawText(TextFormat("%s (precio: %d)", item->nombre, item->precio),
-                     botones[i].x + 10, botones[i].y + 15, 20, BLACK);
+        // Mostrar contador de ítems cargados
+        DrawText(TextFormat("Items cargados: %d", total), 20, 10, 20, DARKGREEN);
 
-            if (CheckCollisionPointRec(mouse, botones[i]) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+        // --- Dibujo con scroll ---
+        int i = 0;
+        for (int y = 0; i < total; i++) {
+            Rectangle btn = botones[i];
+            btn.y -= scrollY;
+            if (btn.y + btn.height < 80 || btn.y > GetScreenHeight() - 40) continue; // Fuera de la vista
+
+            Item* item = items[i];
+            DrawRectangleRec(btn, LIGHTGRAY);
+            DrawRectangleLinesEx(btn, 2, GRAY);
+            DrawText(TextFormat("%s (precio: %d)", item->nombre, item->precio),
+                     btn.x + 10, btn.y + 10, 20, BLACK);
+            if (item->tipo == COMIDA) {
+                DrawText("Tipo: Comida", btn.x + 10, btn.y + 35, 18, DARKGREEN);
+                DrawText(TextFormat("Valor energético: %d", item->valor_energetico), btn.x + 200, btn.y + 35, 18, DARKGREEN);
+            } else if (item->tipo == ASPECTO) {
+                DrawText("Tipo: Aspecto", btn.x + 10, btn.y + 35, 18, DARKBLUE);
+                // Mostrar imagen más pequeña
+                if (item->ruta_imagen && strlen(item->ruta_imagen) > 0 && item->aspecto.id > 0) {
+                    float scale = 0.25f; // Escala más pequeña
+                    float imgH = item->aspecto.height * scale;
+                    float posX = btn.x + 300;
+                    float posY = btn.y + (btn.height - imgH) / 2;
+                    DrawTextureEx(item->aspecto, (Vector2){posX, posY}, 0, scale, WHITE);
+                }
+            }
+            DrawText(TextFormat("Cantidad: %d", contadores[i]), btn.x + 600, btn.y + 20, 18, MAROON);
+
+            // Selección de ítem (solo cuando se suelta el mouse sobre el botón)
+            if (CheckCollisionPointRec(mouse, btn) && IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
                 seleccion = i;
             }
-            i++;
         }
 
+        // Mostrar texto de salir en la esquina derecha
+        int anchoTexto = MeasureText("Backspace para salir de la tienda", 18);
+        DrawText("Backspace para salir de la tienda", GetScreenWidth() - anchoTexto - 20, 20, 18, GRAY);
+
         EndDrawing();
+
+        // Salir con BACKSPACE, solo si mouseReleased
+        if (IsKeyPressed(KEY_BACKSPACE)) {
+            salir = true;
+            mouseReleased = false;
+        }
+
+        // Detectar cuando se suelta el mouse
+        if (!IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
+            mouseReleased = true;
+        }
     }
 
-    // Selección y compra
-    if (seleccion < 0 || seleccion >= total) {
+    // Si se salió sin seleccionar, limpiar y continuar (no return)
+    if (seleccion < 0 || seleccion >= total || salir) {
         free(botones);
+        free(contadores);
+        free(items);
         return;
     }
 
     // Buscar el ítem seleccionado
-    int i = 0;
-    Item* itemSeleccionado = NULL;
-    for (Pair* p = firstMap(tienda); p != NULL; p = nextMap(tienda)) {
-        if (i == seleccion) {
-            itemSeleccionado = (Item*)p->value;
-            break;
-        }
-        i++;
-    }
+    Item* itemSeleccionado = items[seleccion];
 
     if (!itemSeleccionado) {
         free(botones);
+        free(contadores);
+        free(items);
         return;
     }
 
     if (mascota->monedas < itemSeleccionado->precio) {
-        BeginDrawing();
-        ClearBackground(RAYWHITE);
-        DrawText("No tienes suficientes monedas para comprar este ítem.", 180, 280, 20, RED);
-        EndDrawing();
+        bool salirMensaje = false;
+        Rectangle btnOk = { 400, 350, 120, 40 };
+
+        // Variable para controlar si el mouse fue soltado antes de mostrar el mensaje
+        bool mouseReleasedBefore = false;
+        // Esperar a que el mouse esté soltado antes de mostrar el mensaje
+        while (IsMouseButtonDown(MOUSE_LEFT_BUTTON) && !WindowShouldClose()) {
+            // Espera activa para evitar interacción accidental
+        }
+        mouseReleasedBefore = true;
+
+        while (!salirMensaje && !WindowShouldClose()) {
+            Vector2 mouse = GetMousePosition();
+
+            BeginDrawing();
+            ClearBackground(RAYWHITE);
+            DrawText("No tienes suficientes monedas para comprar este ítem.", 180, 280, 20, RED);
+
+            // Botón OK
+            bool hoverOk = CheckCollisionPointRec(mouse, btnOk);
+            DrawRectangleRec(btnOk, hoverOk ? SKYBLUE : LIGHTGRAY);
+            DrawRectangleLinesEx(btnOk, 2, GRAY);
+            DrawText("OK", btnOk.x + 35, btnOk.y + 10, 20, BLACK);
+
+            // Mostrar texto de salir en la esquina derecha
+            int anchoTexto = MeasureText("Backspace para salir de la tienda", 18);
+            DrawText("Backspace para salir de la tienda", GetScreenWidth() - anchoTexto - 20, 20, 18, GRAY);
+
+            EndDrawing();
+
+            // Permitir cerrar con click en OK, ENTER, ESCAPE o BACKSPACE
+            if ((hoverOk && IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) ||
+                IsKeyPressed(KEY_ENTER) || IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_BACKSPACE)) {
+                salirMensaje = true;
+            }
+        }
+        // Esperar a que el mouse se suelte antes de continuar para evitar clicks accidentales
+        while (IsMouseButtonDown(MOUSE_LEFT_BUTTON) && !WindowShouldClose()) {
+            // Espera activa
+        }
         free(botones);
+        free(contadores);
+        free(items);
         return;
     }
 
@@ -164,47 +273,66 @@ void mostrarTienda(Mascota* mascota, Escenario* escenario) {
     list_pushFront(mascota->inventario, itemSeleccionado);
 
     free(botones);
+    free(contadores);
+    free(items);
     return;
-} 
+}
 
 void cargarItemsTienda(Map* tienda) {
     char* texto = LoadFileText("resources/items.csv");
-    
-    char* linea = strtok(texto, "\r\n"); // Saltar encabezado
-    linea = strtok(NULL, "\r\n");
+    if (!texto) return;
 
-    while (linea != NULL) {
-        // Reservar ítem
-        Item* item = malloc(sizeof(Item));
-        item->ruta_imagen = NULL;
-        item->nombre = NULL;
+    char* linea;
+    int linea_num = 0;
+
+    char* saveptr;
+    linea = strtok_r(texto, "\r\n", &saveptr);
+    while (linea) {
+        if (strlen(linea) == 0) {
+            linea = strtok_r(NULL, "\r\n", &saveptr);
+            continue; // Salta líneas vacías
+        }
+
+        // Saltar la primera línea (primer dato)
+        if (linea_num == 0) {
+            linea_num++;
+            linea = strtok_r(NULL, "\r\n", &saveptr);
+            continue;
+        }
+
+        char buffer[512];
+        strncpy(buffer, linea, sizeof(buffer) - 1);
+        buffer[sizeof(buffer) - 1] = '\0';
 
         // Tokenizar los campos
-        char* nombre = strtok(linea, ",");
+        char* nombre = strtok(buffer, ",");
         char* tipo = strtok(NULL, ",");
         char* precioStr = strtok(NULL, ",");
         char* valorStr = strtok(NULL, ",");
         char* ruta = strtok(NULL, ",");
 
-        // Copiar datos
+        if (!nombre || !tipo || !precioStr || !valorStr) {
+            linea = strtok_r(NULL, "\r\n", &saveptr);
+            continue; // Línea mal formada
+        }
+
+        Item* item = malloc(sizeof(Item));
         item->nombre = strdup(nombre);
         item->tipo = (strcmp(tipo, "COMIDA") == 0) ? COMIDA : ASPECTO;
         item->precio = atoi(precioStr);
         item->valor_energetico = atoi(valorStr);
 
-        // Si es aspecto, cargar textura y guardar ruta
         if (item->tipo == ASPECTO && ruta && strlen(ruta) > 0) {
             item->ruta_imagen = strdup(ruta);
             item->aspecto = LoadTexture(item->ruta_imagen);
         } else {
+            item->ruta_imagen = NULL;
             item->aspecto = (Texture2D){ 0 };
         }
 
-        // Insertar al mapa con clave el nombre
         insertMap(tienda, item->nombre, item);
-
-        // Siguiente línea
-        linea = strtok(NULL, "\r\n");
+        linea_num++;
+        linea = strtok_r(NULL, "\r\n", &saveptr);
     }
 
     UnloadFileText(texto);
