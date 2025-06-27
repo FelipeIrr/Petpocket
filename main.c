@@ -244,6 +244,7 @@ int main(void)
             }
             else if (pantallaActual == MENU_ACCESORIOS) {
                 DrawText("ACCESORIOS", 20, 20, 30, DARKPURPLE);
+                cambiarAspectoMascota(Pocket); // cambiar el aspecto de la mascota
                 DrawText("Presiona BACKSPACE para volver", 20, 60, 20, GRAY);
                 if (IsKeyPressed(KEY_BACKSPACE)) pantallaActual = MENU_PRINCIPAL;
             }
@@ -256,12 +257,13 @@ int main(void)
             }
             else if (pantallaActual == MENU_COMIDA) {
                 DrawText("COMIDA", 20, 20, 30, DARKBROWN);
+                alimentarMascota(Pocket); 
                 DrawText("Presiona BACKSPACE para volver", 20, 60, 20, GRAY);
                 if (IsKeyPressed(KEY_BACKSPACE)) pantallaActual = MENU_PRINCIPAL;
             }
             else if (pantallaActual == MENU_LUGARES) {
                 DrawText("LUGARES", 20, 20, 30, DARKGRAY);
-                cambiarEscenario(Pocket, vectorEscenarios); // función para cambiar de escenario
+                cambiarEscenario(Pocket, vectorEscenarios); 
                 DrawText("Presiona BACKSPACE para volver", 20, 60, 20, GRAY);
                 if (IsKeyPressed(KEY_BACKSPACE)) pantallaActual = MENU_PRINCIPAL;
             }
