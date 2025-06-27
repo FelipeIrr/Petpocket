@@ -110,7 +110,8 @@ int main(void)
     SetTargetFPS(60);
     //--------------------------------------------------------------------------------------
     Array* vectorEscenarios = cargarEscenarios(); 
-    Mascota* Pocket = crearMascota(); 
+    Mascota* Pocket = crearMascota();
+    Pocket->escenarioActual = array_get(vectorEscenarios, 0); // Asignar el primer escenario al Pocket al inicializar 
     crearTienda(array_get(vectorEscenarios, 0)); 
     
     /*Map* tiendas = createMap(100); 
@@ -237,6 +238,7 @@ int main(void)
                 DrawText("Reiniciar", 60, 230, 20, WHITE);
                 if (CheckCollisionPointRec(GetMousePosition(), (Rectangle){40, 220, 120, 40}) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
                     reiniciar(&Pocket); // Reinicia la mascota
+                    Pocket->escenarioActual = array_get(vectorEscenarios, 0); // Reinicia el escenario
                     pantallaActual = MENU_PRINCIPAL;
                     // Y reiniciar otras variables del juego aquí
                 }
@@ -268,6 +270,7 @@ int main(void)
             }
             else if (pantallaActual == MENU_LUGARES) {
                 DrawText("LUGARES", 20, 20, 30, DARKGRAY);
+                cambiarEscenario(Pocket, vectorEscenarios); // función para cambiar de escenario
                 DrawText("Presiona BACKSPACE para volver", 20, 60, 20, GRAY);
                 if (IsKeyPressed(KEY_BACKSPACE)) pantallaActual = MENU_PRINCIPAL;
             }

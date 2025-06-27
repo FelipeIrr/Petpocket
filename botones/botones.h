@@ -35,6 +35,7 @@ typedef struct Mascota {
     int monedas;
     List* inventario; // ítems en inventario
     Texture2D aspecto_actual;
+    Escenario* escenarioActual; // Escenario actual de la mascota
 } Mascota;
 
 
@@ -49,5 +50,7 @@ void cargarItemsTienda(Map* tienda);
 void crearTienda(Escenario* escenario);
 
 void mostrarTienda(Mascota* mascota, Escenario* escenario);
+
+void cambiarEscenario(Mascota* mascota, Array* escenarios);
 
 #endif
