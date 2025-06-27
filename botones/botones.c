@@ -73,7 +73,6 @@ Mascota* crearMascota() { //Escenario* escenario)
     m->monedas = 0;
     m->inventario = list_create();
     m->aspecto_actual = LoadTexture("resources/yipeee!.png"); // Inicializar sin escenario
-    //m->escenario_actual =  //TESTING
 
     return m;
 }
@@ -452,23 +451,163 @@ void cambiarEscenario(Mascota* mascota, Array* escenarios) {
 }
 
 void cambiarAspectoMascota(Mascota* mascota) {
-    int cantidad = 0;
-    Item* aspectos[20];  //  20 aspectos distintos (recordar ampliar esto)
 
-    void* actual = list_first(mascota->inventario);
-    while (actual && cantidad < 20) {
-        Item* item = (Item*)actual;
-        if (item->tipo == ASPECTO) {
-            aspectos[cantidad++] = item;
+    // Contar cuántos aspectos hay
+    int cantidad = 0;
+    for (Item* item = list_first(mascota->inventario); item != NULL; item = list_next(mascota->inventario)) {
+        if (item->tipo == ASPECTO && item->aspecto.id > 0) cantidad++;
+    }
+    if (cantidad == 0) {
+        bool salir = false;
+        while (!salir && !WindowShouldClose()) {
+            BeginDrawing();
+            ClearBackground(RAYWHITE);
+            int anchoTexto = MeasureText("No tienes aspectos disponibles en el inventario.", 20);
+            DrawText("No tienes aspectos disponibles en el inventario.", (GetScreenWidth() - anchoTexto) / 2, 300, 20, RED);
+            int anchoSalir = MeasureText("Presiona BACKSPACE o ESC para salir", 18);
+            DrawText("Presiona BACKSPACE o ESC para salir", (GetScreenWidth() - anchoSalir) / 2, 340, 18, GRAY);
+            EndDrawing();
+            if (IsKeyPressed(KEY_BACKSPACE) || IsKeyPressed(KEY_ESCAPE)) salir = true;
         }
-        actual = list_next(mascota->inventario);
+        return;
     }
 
-    if (cantidad == 0) { // No hay aspectos disponibles
+    // Crear arreglo dinámico de aspectos
+    Item** aspectos = malloc(sizeof(Item*) * cantidad);
+    int idx = 0;
+    for (Item* item = list_first(mascota->inventario); item != NULL; item = list_next(mascota->inventario)) {
+        if (item->tipo == ASPECTO && item->aspecto.id > 0) aspectos[idx++] = item;
+    }
+
+    int seleccion = 0;
+
+    while (!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(RAYWHITE);
-        DrawText("No tienes aspectos disponibles en el inventario.", 300, 300, 20, RED);
+
+        // Título
+        const char* titulo = "Selecciona un aspecto con <- y ->, ENTER para confirmar";
+        int anchoTitulo = MeasureText(titulo, 20);
+        DrawText(titulo, (GetScreenWidth() - anchoTitulo) / 2, 50, 20, DARKGRAY);
+
+        // Mostrar todos los aspectos en una fila
+        int thumbSize = 100;
+        int spacing = 30;
+        int totalWidth = cantidad * thumbSize + (cantidad - 1) * spacing;
+        int startX = (GetScreenWidth() - totalWidth) / 2;
+        int y = 180;
+
+        for (int i = 0; i < cantidad; i++) {
+            Texture2D textura = aspectos[i]->aspecto;
+            Rectangle dest = { startX + i * (thumbSize + spacing), y, thumbSize, thumbSize };
+            // Dibuja marco si está seleccionado
+            if (i == seleccion) {
+                DrawRectangleLinesEx(dest, 4, GOLD);
+            } else {
+                DrawRectangleLinesEx(dest, 2, GRAY);
+            }
+            // Dibuja la textura centrada en el thumbnail
+            if (textura.id > 0) {
+                float scale = fminf(thumbSize / (float)textura.width, thumbSize / (float)textura.height);
+                int drawW = (int)(textura.width * scale);
+                int drawH = (int)(textura.height * scale);
+                int drawX = dest.x + (thumbSize - drawW) / 2;
+                int drawY = dest.y + (thumbSize - drawH) / 2;
+                DrawTextureEx(textura, (Vector2){drawX, drawY}, 0, scale, WHITE);
+            }
+            // Nombre debajo
+            int anchoNombre = MeasureText(aspectos[i]->nombre, 18);
+            DrawText(aspectos[i]->nombre, dest.x + (thumbSize - anchoNombre) / 2, dest.y + thumbSize + 8, 18, (i == seleccion) ? GOLD : BLACK);
+        }
+
+        // Instrucción para salir
+        int anchoSalir = MeasureText("BACKSPACE o ESC para salir", 18);
+        DrawText("BACKSPACE o ESC para salir", (GetScreenWidth() - anchoSalir) / 2, GetScreenHeight() - 40, 18, GRAY);
+
         EndDrawing();
+
+        // Navegación
+        if (IsKeyPressed(KEY_RIGHT)) {
+            if (cantidad > 0) seleccion = (seleccion + 1) % cantidad;
+        }
+        if (IsKeyPressed(KEY_LEFT)) {
+            if (cantidad > 0) seleccion = (seleccion - 1 + cantidad) % cantidad;
+        }
+
+        // Confirmar selección
+        if (IsKeyPressed(KEY_ENTER)) {
+            if (cantidad > 0 && seleccion >= 0 && seleccion < cantidad && aspectos[seleccion]) {
+                mascota->aspecto_actual = aspectos[seleccion]->aspecto;
+
+                // Mensaje de confirmación
+                bool salirConfirm = false;
+                while (!salirConfirm && !WindowShouldClose()) {
+                    BeginDrawing();
+                    ClearBackground(RAYWHITE);
+                    int anchoMsg = MeasureText("¡Aspecto actualizado!", 20);
+                    DrawText("¡Aspecto actualizado!", (GetScreenWidth() - anchoMsg) / 2, 300, 20, DARKGREEN);
+                    int anchoSalir = MeasureText("Presiona BACKSPACE o ESC para salir", 18);
+                    DrawText("Presiona BACKSPACE o ESC para salir", (GetScreenWidth() - anchoSalir) / 2, 340, 18, GRAY);
+                    EndDrawing();
+
+                    if (IsKeyPressed(KEY_BACKSPACE) || IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_ENTER))
+                        salirConfirm = true;
+                }
+            }
+            break;
+        }
+
+        // Salir sin cambiar
+        if (IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_BACKSPACE)) break;
+    }
+
+    free(aspectos);
+}
+
+void alimentarMascota(Mascota* mascota) {
+    if (list_size(mascota->inventario) == 0) {
+        BeginDrawing();
+            ClearBackground(RAYWHITE);
+            DrawText("No tienes comida en el inventario.", 250, 280, 20, RED);
+        EndDrawing();
+        return;
+    }
+
+    // --- Contar y agrupar comidas únicas ---
+    // Primero, contar cuántos tipos únicos de comida hay
+    typedef struct {
+        Item* item;
+        int cantidad;
+    } ComidaContador;
+
+    int total = 0;
+    // Máximo: todos los items del inventario son comida distinta
+    ComidaContador* comidas = malloc(sizeof(ComidaContador) * list_size(mascota->inventario));
+
+    for (Item* item = list_first(mascota->inventario); item != NULL; item = list_next(mascota->inventario)) {
+        if (item->tipo != COMIDA) continue;
+        // Buscar si ya está en el arreglo
+        int encontrado = 0;
+        for (int i = 0; i < total; i++) {
+            if (strcmp(comidas[i].item->nombre, item->nombre) == 0) {
+                comidas[i].cantidad++;
+                encontrado = 1;
+                break;
+            }
+        }
+        if (!encontrado) {
+            comidas[total].item = item;
+            comidas[total].cantidad = 1;
+            total++;
+        }
+    }
+
+    if (total == 0) {
+        BeginDrawing();
+            ClearBackground(RAYWHITE);
+            DrawText("No tienes comida en el inventario.", 250, 280, 20, RED);
+        EndDrawing();
+        free(comidas);
         return;
     }
 
@@ -477,25 +616,99 @@ void cambiarAspectoMascota(Mascota* mascota) {
     while (!WindowShouldClose()) {
         BeginDrawing();
         ClearBackground(RAYWHITE);
-        DrawText("Selecciona un aspecto con <- y ->, ENTER para confirmar", 180, 50, 20, DARKGRAY);
 
-        // Dibuja el aspecto seleccionado
-        DrawTexture(aspectos[seleccion]->aspecto, 400, 150, WHITE);
-        DrawText(aspectos[seleccion]->nombre, 400, 400, 20, BLACK);
+        // Título
+        const char* titulo = "Selecciona una comida con <- y ->, ENTER para alimentar";
+        int anchoTitulo = MeasureText(titulo, 20);
+        DrawText(titulo, (GetScreenWidth() - anchoTitulo) / 2, 50, 20, DARKGRAY);
+
+        // Mostrar todas las comidas en una fila
+        int thumbSize = 100;
+        int spacing = 30;
+        int totalWidth = total * thumbSize + (total - 1) * spacing;
+        int startX = (GetScreenWidth() - totalWidth) / 2;
+        int y = 180;
+
+        for (int i = 0; i < total; i++) {
+            Texture2D textura = comidas[i].item->aspecto;
+            Rectangle dest = { startX + i * (thumbSize + spacing), y, thumbSize, thumbSize };
+            // Dibuja marco si está seleccionado
+            if (i == seleccion) {
+                DrawRectangleLinesEx(dest, 4, GOLD);
+            } else {
+                DrawRectangleLinesEx(dest, 2, GRAY);
+            }
+            // Dibuja la textura centrada en el thumbnail
+            if (textura.id > 0) {
+                float scale = fminf(thumbSize / (float)textura.width, thumbSize / (float)textura.height);
+                int drawW = (int)(textura.width * scale);
+                int drawH = (int)(textura.height * scale);
+                int drawX = dest.x + (thumbSize - drawW) / 2;
+                int drawY = dest.y + (thumbSize - drawH) / 2;
+                DrawTextureEx(textura, (Vector2){drawX, drawY}, 0, scale, WHITE);
+            }
+            // Nombre debajo
+            int anchoNombre = MeasureText(comidas[i].item->nombre, 18);
+            DrawText(comidas[i].item->nombre, dest.x + (thumbSize - anchoNombre) / 2, dest.y + thumbSize + 8, 18, (i == seleccion) ? GOLD : BLACK);
+
+            // Cantidad debajo del nombre
+            char cantidadTxt[32];
+            snprintf(cantidadTxt, sizeof(cantidadTxt), "x%d", comidas[i].cantidad);
+            int anchoCantidad = MeasureText(cantidadTxt, 16);
+            DrawText(cantidadTxt, dest.x + (thumbSize - anchoCantidad) / 2, dest.y + thumbSize + 30, 16, DARKGREEN);
+        }
+
+        // Instrucción para salir
+        int anchoSalir = MeasureText("BACKSPACE o ESC para salir", 18);
+        DrawText("BACKSPACE o ESC para salir", (GetScreenWidth() - anchoSalir) / 2, GetScreenHeight() - 40, 18, GRAY);
 
         EndDrawing();
 
+        // Navegación
+        if (IsKeyPressed(KEY_RIGHT)) {
+            if (total > 0) seleccion = (seleccion + 1) % total;
+        }
+        if (IsKeyPressed(KEY_LEFT)) {
+            if (total > 0) seleccion = (seleccion - 1 + total) % total;
+        }
+
         // Confirmar selección
         if (IsKeyPressed(KEY_ENTER)) {
-            mascota->aspecto_actual = aspectos[seleccion]->aspecto;
-            BeginDrawing();
-            ClearBackground(RAYWHITE);
-            DrawText("¡Aspecto actualizado!", 300, 300, 20, DARKGREEN);
-            EndDrawing();
+            if (total > 0 && seleccion >= 0 && seleccion < total && comidas[seleccion].cantidad > 0) {
+                // Alimentar: sumar energía y eliminar un item de ese tipo del inventario
+                mascota->energia += comidas[seleccion].item->valor_energetico;
+                // Limitar energía máxima si lo deseas, por ejemplo 100
+                if (mascota->energia > 100) mascota->energia = 100;
+
+                // Eliminar un item de ese tipo del inventario
+                for (Item* item = list_first(mascota->inventario); item != NULL; item = list_next(mascota->inventario)) {
+                    if (item->tipo == COMIDA && strcmp(item->nombre, comidas[seleccion].item->nombre) == 0) {
+                        list_popCurrent(mascota->inventario);
+                        break;
+                    }
+                }
+
+                // Mensaje de confirmación
+                bool salirConfirm = false;
+                while (!salirConfirm && !WindowShouldClose()) {
+                    BeginDrawing();
+                    ClearBackground(RAYWHITE);
+                    int anchoMsg = MeasureText("¡Mascota alimentada!", 20);
+                    DrawText("¡Mascota alimentada!", (GetScreenWidth() - anchoMsg) / 2, 300, 20, DARKGREEN);
+                    int anchoSalir = MeasureText("Presiona BACKSPACE o ESC para salir", 18);
+                    DrawText("Presiona BACKSPACE o ESC para salir", (GetScreenWidth() - anchoSalir) / 2, 340, 18, GRAY);
+                    EndDrawing();
+
+                    if (IsKeyPressed(KEY_BACKSPACE) || IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_ENTER))
+                        salirConfirm = true;
+                }
+            }
             break;
         }
 
-        // Salir sin cambiar si presiona ESC
-        if (IsKeyPressed(KEY_ESCAPE)) break;
+        // Salir sin alimentar
+        if (IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_BACKSPACE)) break;
     }
-}
+
+    free(comidas);
+}   
