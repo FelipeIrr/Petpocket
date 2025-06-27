@@ -670,10 +670,20 @@ void cambiarAspectoMascota(Mascota* mascota) {
 
 void alimentarMascota(Mascota* mascota) {
     if (list_size(mascota->inventario) == 0) {
-        BeginDrawing();
-            ClearBackground(RAYWHITE);
-            DrawText("No tienes comida en el inventario.", 250, 280, 20, RED);
-        EndDrawing();
+        bool salir = false;
+        while (!salir && !WindowShouldClose()) {
+            BeginDrawing();
+                ClearBackground(RAYWHITE);
+                DrawText("No tienes comida en el inventario.", 250, 280, 20, RED);
+
+                int anchoSalir = MeasureText("Presiona BACKSPACE o ESC para salir", 18);
+                DrawText("Presiona BACKSPACE o ESC para salir", (GetScreenWidth() - anchoSalir) / 2, 400, 18, GRAY);
+            EndDrawing();
+
+            if (IsKeyPressed(KEY_BACKSPACE) || IsKeyPressed(KEY_ESCAPE)) {
+                salir = true;
+            }
+        }
         return;
     }
 
