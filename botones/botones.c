@@ -1,3 +1,4 @@
+#include "botones.h"
 #include "raylib.h"
 #include "rlgl.h"
 #include "raymath.h"
@@ -216,6 +217,16 @@ void cambiarEscenario(Mascota* mascota, Array* escenarios) {
     }
 }
 
+// Función auxiliar para saber si un aspecto ya está en el inventario
+bool tieneAspecto(List* inventario, Item* aspecto) {
+    for (Item* it = list_first(inventario); it != NULL; it = list_next(inventario)) {
+        if (it->tipo == ASPECTO && strcmp(it->nombre, aspecto->nombre) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
 // ACCESO A TIENDA
 void tienda(Mascota* mascota) {
     Map* tienda = mascota->escenario_actual->tienda;
@@ -227,8 +238,19 @@ void tienda(Mascota* mascota) {
         pares[total++] = par;
     }
 
-    Rectangle botones[total];
+    // Filtrar los ítems que se mostrarán (no mostrar aspectos ya comprados)
+    int visibles = 0;
+    Item* visiblesItems[100];
     for (int i = 0; i < total; i++) {
+        Item* item = (Item*)pares[i]->value;
+        if (item->tipo == ASPECTO && tieneAspecto(mascota->inventario, item)) {
+            continue; // No mostrar si ya lo tiene
+        }
+        visiblesItems[visibles++] = item;
+    }
+
+    Rectangle botones[visibles];
+    for (int i = 0; i < visibles; i++) {
         botones[i] = (Rectangle){ 100, 120 + i * 60, 800, 50 };
     }
 
@@ -243,8 +265,8 @@ void tienda(Mascota* mascota) {
         DrawText("--- TIENDA ---", 400, 40, 30, DARKBLUE);
         DrawText(TextFormat("Monedas: %d", mascota->monedas), 40, 40, 20, DARKGRAY);
 
-        for (int i = 0; i < total; i++) {
-            Item* item = (Item*)pares[i]->value;
+        for (int i = 0; i < visibles; i++) {
+            Item* item = visiblesItems[i];
 
             DrawRectangleRec(botones[i], LIGHTGRAY);
             DrawRectangleLinesEx(botones[i], 2, GRAY);
@@ -261,9 +283,9 @@ void tienda(Mascota* mascota) {
         EndDrawing();
     }
 
-    if (seleccion < 0 || seleccion >= total) return;
+    if (seleccion < 0 || seleccion >= visibles) return;
 
-    Item* item = (Item*)pares[seleccion]->value;
+    Item* item = visiblesItems[seleccion];
 
     if (mascota->monedas < item->precio) {
         for (int i = 0; i < 90; i++) {
