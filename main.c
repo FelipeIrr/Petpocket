@@ -114,7 +114,7 @@ int main(void)
     crearTienda(array_get(vectorEscenarios, 0)); 
     
     // Main game loop
-    while (!WindowShouldClose())    // Detect window close button or ESC key
+    while (!WindowShouldClose())    // Main game loop
     {
         // Update
         //----------------------------------------------------------------------------------
@@ -138,6 +138,10 @@ int main(void)
         angle += 0.005f;
         camera.position.x = sinf(angle) * 10.0f;
         camera.position.z = cosf(angle) * 10.0f;
+
+        // --- Actualiza la textura del fondo según el escenario actual ---
+        skyboxModel.materials[0].maps[MATERIAL_MAP_DIFFUSE].texture = Pocket->escenarioActual->imagen_fondo;
+
         //----------------------------------------------------------------------------------
 
         // Draw
