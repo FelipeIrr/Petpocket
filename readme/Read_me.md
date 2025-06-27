@@ -7,14 +7,14 @@
 ▶Descripción
 
 ◜                                                                                                         ◝
- Esta aplicacion es una mascota virtual llamada Pocket con la cual puedes interactuar con diferentes botones 
+ PetPocket es una  aplicación que consiste en una mascota virtual llamada Pocket con la cual puedes interactuar con diferentes botones 
  donde podrás: avanzar por distintos escenarios, comprar comida, comprar aspectos y divertirte con un juego ritmico. 
 ◟                                                                                                         ◞
 
-▶Cómo compilar y ejecutar el código
+▶Cómo compilar y ejecutar el programa
 
 ◜                                                                                                                       ◝
- Este aplicación fue desarrollada en el lenguaje C, usando la biblioteca raylib. Para ejecutar el programa esto se debe hacer mediente el  programa **Visual Studio Code**, junto con sus respectivas extensiones como *C/C++ Extensión Pack* de Microsoft. Para compilar y ejecutar, los pasos son los siguientes:
+ Este aplicación fue desarrollada en el lenguaje C, usando la biblioteca Raylib. Para ejecutar el programa esto se debe hacer mediente el  programa **Visual Studio Code**, junto con sus respectivas extensiones como C/C++ Extensión Pack* de Microsoft. Para compilar y ejecutar, los pasos son los siguientes:
 
  ●Requisitos previos:
   
@@ -23,7 +23,7 @@
   ○ Tener instalado un compilador de C por ejemplo gcc.
     Si se utiliza windows para ejecutar este programa
     se recomienda instalar MinGW o utilizar el entorno WSL.
-  ○ Descargar biblioteca raylib e incluirla al *PATH*, se puede descargar en el siguiente link: https://raysan5.itch.io/raylib/download/eyJleHBpcmVzIjoxNzUxMDYwNjIzLCJpZCI6ODUzMzF9.sM3tnZIwvcesnmFXoGpKTbgjcOE%3d.
+  ○ Descargar biblioteca raylib e incluirla al *PATH*, se puede descargar en el siguiente link: https://raysan5.itch.io/raylib/download/eyJleHBpcmVzIjoxNzUxMDYwNjIzLCJpZCI6ODUzMzF9.sM3tnZIwvcesnmFXoGpKTbgjcOE%3d
   ○ Instalar en VScode las etensiones *CMake* y *Autocomplete for raylib-lua-bindings*
 
  ●Pasos para compilar y ejecutar:
@@ -53,8 +53,7 @@
   ○ Las opciones del sistema donde puedes cambiar el nombre, ajustes de volumen, reiniciar la partida y salir de la aplicacion.
 
  ●Limitaciones conocidas:
-  ○ 
-  ○ 
+  ○ Si se carga un archivo csv con más de 7 escenarios existe la posibilidad de crear un glitch.
  
  ●A mejorar:
   ○ Aún no se implementan items desbloqueables a partir del escenario en que se encuentre la mascota.
@@ -94,9 +93,9 @@ Los pasos son solo en modo de ejemplo, el usaruio podra escojer cualquier boton 
 ● Alimentar Mascota
  Al seleccionar el boton para alimentar a la mascota, se mostrará una ventana con un catálogo que consiste en todos los tipos de comida (con la energía que aportan al consumirlas) y sus cantidades con las que cuenta la mascota en su inventario.
  ◤                                                      ◥
-  ![alt text](Comida.PNG)
+  ![alt text](Comida-2.PNG)
  ◣                                                      ◢
- □ Para consumir el alimento el usuario deberá navegar por los tipos de comida que se encuentran en el inventario de la mascota con las flechas izquiera y derecha  de su teclado (<- y ->), una vez se encuentre seleccionando la opción requerida debe presionar la tecla "Enter" y se realizará la operación. Una vez consumido el alimento se aumentará respectivamente la energía de la mascota y se eliminará la/las comidas del inventario dependiendo de la operación seleccionada por el usuario. Si la energía se encuentra al máximo (100) se mostrará un mensaje en pantalla indicando que no se puede realizar la operación debido a esto.
+ □ Para consumir el alimento el usuario deberá navegar por los tipos de comida que se encuentran en el inventario de la mascota con las flechas izquiera y derecha  de su teclado (<- y ->), una vez se encuentre seleccionando la opción requerida debe presionar la tecla "Enter" y se realizará la operación. Una vez consumido el alimento se aumentará respectivamente la energía de la mascota y se eliminará la/las comidas del inventario dependiendo de la operación seleccionada por el usuario. Si la energía se encuentra al máximo (100) se mostrará un mensaje en pantalla indicando que no se puede realizar la operación debido a que la energía ya se encuentra en el máximo.
 
 ● Aspectos
  Al seleccionar el boton para cambiar el aspecto de la mascota, se mostará una ventana con un catálogo con todos los aspectos adquiridos por el usuario (estos son los aspectos comprados que se encuentran en el inventario de la mascota).
@@ -106,11 +105,11 @@ Los pasos son solo en modo de ejemplo, el usaruio podra escojer cualquier boton 
  □ Para cambiar el aspecto el usuario deberá navegar por los diferentes aspectos que se encuentran en el inventario de la mascota con las flechas izquiera y derecha  de su teclado (<- y ->), una vez se encuentre seleccionando la opción requerida debe presionar la tecla "Enter" y se realizará la operación.
 
 ● Cambiar Escenario
- Al seleccionar el boton para cambiar de escenario se mostrará un mensaje en pantalla informando que la operación se realizó con éxito, descontando las monedas y energía
+ Al seleccionar el boton para cambiar de escenario se mostrará un mensaje en pantalla informando que la operación se realizó con éxito, descontando las monedas y energía que se requieren para el cambio. En el caso que no se cumplan los requerimientos de monedas y/o energía se mostrará un mensaje indicando que la acción no se puede realizar.
  ◤                                                      ◥
-
+  ![alt text](escenario.PNG)
  ◣                                                      ◢
- □ Para cambiar el aspecto el usuario deberá navegar por los diferentes aspectos que se encuentran en el inventario de la mascota de comida con las flechas izquiera y derecha  de su teclado (<- y ->), una vez se encuentre seleccionando la opción requerida debe presionar la tecla "Enter" y se realizará la operación.
+ □ Una vez realizado el cambio de escenario, el fondo de la mascota cambiará.
 
 
 

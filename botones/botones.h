@@ -17,7 +17,6 @@ typedef struct Item {
     TipoItem tipo; 
     int precio;
     int valor_energetico;
-    int cantidad; // TEST Cantidad de comida en el inventario
     Texture2D aspecto;  // si es tipo aspecto  
     char* ruta_imagen; // Ruta de la imagen del ítem
 } Item;
