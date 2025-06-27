@@ -7,7 +7,7 @@
 #ifndef BOTONES_H
 #define BOTONES_H
 
-typedef enum {
+typedef enum { //MODULARIZAR ESTRUCTURAS
     COMIDA,
     ASPECTO
 } TipoItem;
@@ -17,7 +17,9 @@ typedef struct Item {
     TipoItem tipo; 
     int precio;
     int valor_energetico;
+    int cantidad; // Cantidad de comida en el inventario
     Texture2D aspecto;  // si es tipo aspecto  
+    char* ruta_imagen; // Ruta de la imagen del ítem
 } Item;
 
 typedef struct Escenario {
@@ -32,24 +34,28 @@ typedef struct Mascota {
     char* nombre;
     int energia;
     int monedas;
-    Escenario* escenario_actual;
     List* inventario; // ítems en inventario
+    Texture2D aspecto_actual;
+    Escenario* escenarioActual; // Escenario actual de la mascota
 } Mascota;
 
-Mascota* crearMascota(Escenario* escenarioInicial);
-//FUNCIONES AUXILIARES DEL JUEGO
-//--------------------------------------------------------------------------------------------------------------------------------------
 
-//ALIMENTAR MASCOTA
-void alimentarMascota(Mascota* m);
-// AVANZAR DE ESCENARIO
+Mascota* crearMascota();
+
+void reiniciar(Mascota**);
+
+Array* cargarEscenarios();
+
+void cargarItemsTienda(Map* tienda);
+
+void crearTienda(Escenario* escenario);
+
+void mostrarTienda(Mascota* mascota, Escenario* escenario);
+
 void cambiarEscenario(Mascota* mascota, Array* escenarios);
-// ACCESO A TIENDA
-void tienda(Mascota* mascota);
 
-//OPCIONES DEL JUEGO
-void opcionesDelSistema(Mascota** mascota, Escenario* escenario_inicial);
+void cambiarAspectoMascota(Mascota* mascota);
 
-
+void alimentarMascota(Mascota* mascota);
 
 #endif

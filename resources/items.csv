@@ -1,0 +1,12 @@
+nombre,tipo,precio,valor_energetico,ruta_imagen
+SuperOcho,COMIDA,10,20,
+Hamburguesa,COMIDA,30,50,
+Pan,COMIDA,25,40,
+Jugo,COMIDA,20,30,
+Sombrero,ASPECTO,10,0,resources/aspecto1.png
+Lentes,ASPECTO,20,0,resources/aspecto2.png
+Flauta,ASPECTO,30,0,resources/aspecto3.png
+Audifonos,ASPECTO,40,0,resources/aspecto4.png
+Gorro,ASPECTO,50,0,resources/aspecto5.png
+Corazón,ASPECTO,60,0,resources/aspecto6.png
+Túnica,ASPECTO,70,0,resources/aspecto7.png
