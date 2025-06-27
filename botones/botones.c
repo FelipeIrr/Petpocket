@@ -391,8 +391,6 @@ void cambiarEscenario(Mascota* mascota, Array* escenarios) {
             DrawText("No tienes suficiente energía para cambiar de escenario (mínimo 50).", 100, 280, 20, RED);
         EndDrawing();
     }
-
-    int total = array_size(escenarios);
     int indice = 0;
 
     while (!WindowShouldClose()) {

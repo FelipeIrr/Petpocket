@@ -270,6 +270,7 @@ int main(void)
             }
             else if (pantallaActual == MENU_LUGARES) {
                 DrawText("LUGARES", 20, 20, 30, DARKGRAY);
+                cambiarEscenario(Pocket, vectorEscenarios); // función para cambiar de escenario
                 DrawText("Presiona BACKSPACE para volver", 20, 60, 20, GRAY);
                 if (IsKeyPressed(KEY_BACKSPACE)) pantallaActual = MENU_PRINCIPAL;
             }
