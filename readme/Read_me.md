@@ -111,7 +111,34 @@ Los pasos son solo en modo de ejemplo, el usaruio podra escojer cualquier boton 
  ◣                                                      ◢
  □ Una vez realizado el cambio de escenario, el fondo de la mascota cambiará.
 
+▶Contribuciones
 
+◜                                                                                                                                ◝
+ ●Benjamín Iribarren
+  ○ Carga de datos
+  ○ Funcionamiento de tienda
+  ○ Funcionalidad para cambio de aspecto
+  ○ Funcionalidad para crear Mascota
+  ○ Funcionalidad para alimentar Mascota
+  ○ Diseño y redacción del README
+
+ ●Felipe Iribarra
+  ○ Interfaz
+  ○ Juego rítmico
+  ○ Menú principal
+  ○ Botones
+  ○ Funcionalidad para cambio de escenario
+  ○ Funcionalidad para configuraciones
+  ○ Funcionalidad para crear Mascota
+  ○ Funcionalidad para alimentar Mascota
+  ○ Revisiones
+
+ ●Jorge Plaza
+  ○ TDAs
+  ○ Investigación
+  ○ Propuestas
+  ○ Diseño y redacción del README
+◟                                                                                                                                ◞
 
 
  
