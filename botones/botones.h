@@ -51,4 +51,6 @@ void crearTienda(Escenario* escenario);
 
 void mostrarTienda(Mascota* mascota, Escenario* escenario);
 
+void cambiarEscenario(Mascota* mascota, Array* escenarios);
+
 #endif

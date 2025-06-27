@@ -14,7 +14,6 @@ TipoItem parseTipo(const char* tipoStr);
 
 // Las definiciones de TipoItem, Item, Escenario y Mascota ya están en botones.h
 
-//CREAR MASCOTA
 Mascota* crearMascota() { //Escenario* escenario) 
     char nombreMascota[32] = "";
     bool nombreIngresado = false;
@@ -272,11 +271,8 @@ void cambiarEscenario(Mascota* mascota, Array* escenarios) {
         Escenario* e = (Escenario*)array_get(escenarios, indice);
 
         Rectangle btnAceptar = { 200, 360, 180, 40 };
-        Rectangle btnSiguiente = { 500, 360, 180, 40 };
-
         Vector2 mouse = GetMousePosition();
         bool aceptarPresionado = false;
-        bool siguientePresionado = false;
 
         BeginDrawing();
             ClearBackground(RAYWHITE);
@@ -292,11 +288,6 @@ void cambiarEscenario(Mascota* mascota, Array* escenarios) {
             DrawRectangleLinesEx(btnAceptar, 1, GRAY);
             DrawText("Aceptar", btnAceptar.x + 50, btnAceptar.y + 10, 20, BLACK);
 
-            // Botón Siguiente
-            DrawRectangleRec(btnSiguiente, LIGHTGRAY);
-            DrawRectangleLinesEx(btnSiguiente, 1, GRAY);
-            DrawText("Siguiente", btnSiguiente.x + 40, btnSiguiente.y + 10, 20, BLACK);
-
         EndDrawing();
 
         // Salir si se presiona BACKSPACE
@@ -308,9 +299,6 @@ void cambiarEscenario(Mascota* mascota, Array* escenarios) {
         if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
             if (CheckCollisionPointRec(mouse, btnAceptar)) {
                 aceptarPresionado = true;
-            }
-            if (CheckCollisionPointRec(mouse, btnSiguiente)) {
-                siguientePresionado = true;
             }
         }
 
@@ -334,10 +322,54 @@ void cambiarEscenario(Mascota* mascota, Array* escenarios) {
                 EndDrawing();
             }
         }
-
-        if (siguientePresionado) {
-            indice = (indice + 1) % total;
-        }
     }
 }
 
+void cambiarAspectoMascota(Mascota* mascota) {
+    int cantidad = 0;
+    Item* aspectos[20];  //  20 aspectos distintos (recordar ampliar esto)
+
+    void* actual = list_first(mascota->inventario);
+    while (actual && cantidad < 20) {
+        Item* item = (Item*)actual;
+        if (item->tipo == ASPECTO) {
+            aspectos[cantidad++] = item;
+        }
+        actual = list_next(mascota->inventario);
+    }
+
+    if (cantidad == 0) { // No hay aspectos disponibles
+        BeginDrawing();
+        ClearBackground(RAYWHITE);
+        DrawText("No tienes aspectos disponibles en el inventario.", 300, 300, 20, RED);
+        EndDrawing();
+        return;
+    }
+
+    int seleccion = 0;
+
+    while (!WindowShouldClose()) {
+        BeginDrawing();
+        ClearBackground(RAYWHITE);
+        DrawText("Selecciona un aspecto con <- y ->, ENTER para confirmar", 180, 50, 20, DARKGRAY);
+
+        // Dibuja el aspecto seleccionado
+        DrawTexture(aspectos[seleccion]->aspecto, 400, 150, WHITE);
+        DrawText(aspectos[seleccion]->nombre, 400, 400, 20, BLACK);
+
+        EndDrawing();
+
+        // Confirmar selección
+        if (IsKeyPressed(KEY_ENTER)) {
+            mascota->aspecto_actual = aspectos[seleccion]->aspecto;
+            BeginDrawing();
+            ClearBackground(RAYWHITE);
+            DrawText("¡Aspecto actualizado!", 300, 300, 20, DARKGREEN);
+            EndDrawing();
+            break;
+        }
+
+        // Salir sin cambiar si presiona ESC
+        if (IsKeyPressed(KEY_ESCAPE)) break;
+    }
+}
