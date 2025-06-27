@@ -7,15 +7,15 @@
 ▶Descripción
 
 ◜                                                                                                         ◝
- Esta aplicacion es una mascota virtual llamada Pocket la cual puedes interactuar con diferentes botones 
- donde podras comprar comida, comprar aspectos y divertirte con un juego ritmico. 
+ Esta aplicacion es una mascota virtual llamada Pocket con la cual puedes interactuar con diferentes botones 
+ donde podrás: avanzar por distintos escenarios, comprar comida, comprar aspectos y divertirte con un juego ritmico. 
 ◟                                                                                                         ◞
 
 ▶Cómo compilar y ejecutar
 
 ◜                                                                                                                       ◝
- Este programa ha sido desarrollado en el lenguaje C y usando la biblioteca rayliv, puede ser ejecutado a través del programa visual studio code
- junto con sus respectivas extensiones como C/C++ Extensión Pack de Microsoft para empezar a operar el programa realicé
+ Este programa ha sido desarrollado en el lenguaje C y usando la biblioteca raylib, puede ser ejecutado a través del programa visual studio code
+ junto con sus respectivas extensiones como C/C++ Extensión Pack de Microsoft para empezar a operar el programa realice
  las siguientes acciones paso a paso.
 
  ●Requisitos previos:
