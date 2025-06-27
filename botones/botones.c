@@ -132,7 +132,6 @@ void mostrarTienda(Mascota* mascota, Escenario* escenario) {
     int maxScroll = (total * 70) - (GetScreenHeight() - 120);
     if (maxScroll < 0) maxScroll = 0;
 
-    bool mouseReleased = true;
     while (!WindowShouldClose() && !salir && seleccion == -1) {
         Vector2 mouse = GetMousePosition();
 
@@ -153,7 +152,7 @@ void mostrarTienda(Mascota* mascota, Escenario* escenario) {
 
         // --- Dibujo con scroll ---
         int i = 0;
-        for (int y = 0; i < total; i++) {
+        for (i ; i < total; i++) {
             Rectangle btn = botones[i];
             btn.y -= scrollY;
             if (btn.y + btn.height < 80 || btn.y > GetScreenHeight() - 40) continue; // Fuera de la vista
@@ -194,12 +193,6 @@ void mostrarTienda(Mascota* mascota, Escenario* escenario) {
         // Salir con BACKSPACE, solo si mouseReleased
         if (IsKeyPressed(KEY_BACKSPACE)) {
             salir = true;
-            mouseReleased = false;
-        }
-
-        // Detectar cuando se suelta el mouse
-        if (!IsMouseButtonDown(MOUSE_LEFT_BUTTON)) {
-            mouseReleased = true;
         }
     }
 
@@ -226,12 +219,10 @@ void mostrarTienda(Mascota* mascota, Escenario* escenario) {
         Rectangle btnOk = { 400, 350, 120, 40 };
 
         // Variable para controlar si el mouse fue soltado antes de mostrar el mensaje
-        bool mouseReleasedBefore = false;
         // Esperar a que el mouse esté soltado antes de mostrar el mensaje
         while (IsMouseButtonDown(MOUSE_LEFT_BUTTON) && !WindowShouldClose()) {
             // Espera activa para evitar interacción accidental
         }
-        mouseReleasedBefore = true;
 
         while (!salirMensaje && !WindowShouldClose()) {
             Vector2 mouse = GetMousePosition();

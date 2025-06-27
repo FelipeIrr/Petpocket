@@ -114,15 +114,6 @@ int main(void)
     Pocket->escenarioActual = array_get(vectorEscenarios, 0); // Asignar el primer escenario al Pocket al inicializar 
     crearTienda(array_get(vectorEscenarios, 0)); 
     
-    /*Map* tiendas = createMap(100); 
-    for (int i = 0; i < array_size(vectorEscenarios); i++) {
-        Escenario* escenario = (Escenario*)array_get(vectorEscenarios, i);
-        if (escenario->tienda == NULL) {
-            crearTienda(escenario); 
-        }
-        insertMap(tiendas, escenario->nombreEscenario, escenario->tienda);
-    }*/
-    
     // Main game loop
     while (!WindowShouldClose())    // Detect window close button or ESC key
     {
