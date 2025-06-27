@@ -60,7 +60,7 @@ void juegoRitmico(Mascota* mascota) {
             // Permitir salir con Backspace
             if (IsKeyPressed(KEY_BACKSPACE)) {
                 salir = true;
-                mascota->monedas += score/1000; // Guarda las monedas ganadas
+                mascota->monedas += score/1; // Guarda las monedas ganadas
                 continue;
             }
 

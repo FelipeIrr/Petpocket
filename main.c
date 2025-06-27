@@ -255,7 +255,7 @@ int main(void)
             else if (pantallaActual == MENU_TIENDA) {
                 DrawText("TIENDA", 20, 20, 30, ORANGE);
                 DrawText("Presiona Y para comprar", 20, 60, 20, PURPLE);
-                 // Muestra la tienda
+                mostrarTienda(Pocket, array_get(vectorEscenarios, 0)); // Muestra la tienda del primer escenario
                 DrawText("Presiona BACKSPACE para volver", 20, 60, 20, GRAY);
                 if (IsKeyPressed(KEY_BACKSPACE)) pantallaActual = MENU_PRINCIPAL;
             }
