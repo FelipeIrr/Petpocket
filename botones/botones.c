@@ -334,29 +334,57 @@ void crearTienda(Escenario* escenario) {
     cargarItemsTienda(escenario->tienda);
 } 
 
-Array* cargarEscenarios(){
+Array* cargarEscenarios() {
     Array* escenarios = array_create(7);
     char* texto = LoadFileText("resources/escenarios.csv");
-    char* linea = strtok(texto, "\r\n"); // Saltar encabezado   
-    linea = strtok(NULL, "\r\n");
-    while (linea != NULL) {
+    if (!texto) return escenarios;
+
+    char* saveptr_linea;
+    char* linea = strtok_r(texto, "\r\n", &saveptr_linea);
+    int linea_num = 0;
+
+    while (linea) {
+        if (strlen(linea) == 0) {
+            linea = strtok_r(NULL, "\r\n", &saveptr_linea);
+            continue; // Saltar líneas vacías
+        }
+
+        // Saltar encabezado
+        if (linea_num == 0) {
+            linea_num++;
+            linea = strtok_r(NULL, "\r\n", &saveptr_linea);
+            continue;
+        }
+
         // Reservar escenario
         Escenario* escenario = malloc(sizeof(Escenario));
         escenario->nombreEscenario = NULL;
         escenario->imagen_fondo = (Texture2D){ 0 };
         escenario->tienda = NULL;
 
+        // Copiar la línea a un buffer temporal para tokenizar
+        char buffer[512];
+        strncpy(buffer, linea, sizeof(buffer) - 1);
+        buffer[sizeof(buffer) - 1] = '\0';
+
         // Tokenizar los campos
-        char* nombre = strtok(linea, ",");
-        char* energiaStr = strtok(NULL, ",");
-        char* monedasStr = strtok(NULL, ",");
-        char* rutaFondo = strtok(NULL, ",");
+        char* saveptr_campo;
+        char* nombre = strtok_r(buffer, ",", &saveptr_campo);
+        char* energiaStr = strtok_r(NULL, ",", &saveptr_campo);
+        char* monedasStr = strtok_r(NULL, ",", &saveptr_campo);
+        char* rutaFondo = strtok_r(NULL, ",", &saveptr_campo);
+
+        if (!nombre || !energiaStr || !monedasStr) {
+            free(escenario);
+            linea = strtok_r(NULL, "\r\n", &saveptr_linea);
+            continue; // Línea mal formada
+        }
 
         // Copiar datos
         escenario->nombreEscenario = strdup(nombre);
         escenario->req_energia = atoi(energiaStr);
         escenario->req_monedas = atoi(monedasStr);
-        
+
         // Cargar imagen de fondo
         if (rutaFondo && strlen(rutaFondo) > 0) {
             Image img = LoadImage(rutaFondo);
@@ -368,8 +396,8 @@ Array* cargarEscenarios(){
         // Insertar al array de escenarios
         array_push_back(escenarios, escenario);
 
-        // Siguiente línea
-        linea = strtok(NULL, "\r\n");
+        linea_num++;
+        linea = strtok_r(NULL, "\r\n", &saveptr_linea);
     }
     UnloadFileText(texto);
     return escenarios;
@@ -377,19 +405,77 @@ Array* cargarEscenarios(){
 
 void cambiarEscenario(Mascota* mascota, Array* escenarios) {
     if (mascota->energia < 50) {
-        BeginDrawing();
-            ClearBackground(RAYWHITE);
-            DrawText("No tienes suficiente energía para cambiar de escenario (mínimo 50).", 100, 280, 20, RED);
-        EndDrawing();
+        bool salir = false;
+        Rectangle btnSalir = { 400, 350, 120, 40 };
+        while (!WindowShouldClose() && !salir) {
+            Vector2 mouse = GetMousePosition();
+            BeginDrawing();
+                ClearBackground(RAYWHITE);
+                DrawText("No tienes suficiente energía para cambiar de escenario (mínimo 50).", 100, 280, 20, RED);
+
+                // Botón Salir
+                bool hoverSalir = CheckCollisionPointRec(mouse, btnSalir);
+                DrawRectangleRec(btnSalir, hoverSalir ? SKYBLUE : LIGHTGRAY);
+                DrawRectangleLinesEx(btnSalir, 2, GRAY);
+                DrawText("Salir", btnSalir.x + 30, btnSalir.y + 10, 20, BLACK);
+
+                int anchoTexto = MeasureText("Backspace para salir", 18);
+                DrawText("Backspace para salir", GetScreenWidth() - anchoTexto - 20, 20, 18, GRAY);
+            EndDrawing();
+
+            if ((hoverSalir && IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) || IsKeyPressed(KEY_BACKSPACE)) {
+                salir = true;
+            }
+        }
+        return;
     }
+
+    int total = array_size(escenarios);
+    // Buscar el índice del escenario actual
     int indice = 0;
+    for (int i = 0; i < total; i++) {
+        if (mascota->escenarioActual == array_get(escenarios, i)) {
+            indice = i;
+            break;
+        }
+    }
 
-    while (!WindowShouldClose()) {
-        Escenario* e = (Escenario*)array_get(escenarios, indice);
+    // Solo permitir avanzar al siguiente escenario si no es el último
+    if (indice >= total - 1) {
+        bool salir = false;
+        Rectangle btnSalir = { 400, 350, 120, 40 };
+        while (!WindowShouldClose() && !salir) {
+            Vector2 mouse = GetMousePosition();
+            BeginDrawing();
+                ClearBackground(RAYWHITE);
+                DrawText("Ya estás en el último escenario disponible.", 200, 280, 20, DARKGRAY);
 
-        Rectangle btnAceptar = { 200, 360, 180, 40 };
-        Vector2 mouse = GetMousePosition();
-        bool aceptarPresionado = false;
+                // Botón Salir
+                bool hoverSalir = CheckCollisionPointRec(mouse, btnSalir);
+                DrawRectangleRec(btnSalir, hoverSalir ? SKYBLUE : LIGHTGRAY);
+                DrawRectangleLinesEx(btnSalir, 2, GRAY);
+                DrawText("Salir", btnSalir.x + 30, btnSalir.y + 10, 20, BLACK);
+
+                int anchoTexto = MeasureText("Backspace para salir", 18);
+                DrawText("Backspace para salir", GetScreenWidth() - anchoTexto - 20, 20, 18, GRAY);
+            EndDrawing();
+
+            if ((hoverSalir && IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) || IsKeyPressed(KEY_BACKSPACE)) {
+                salir = true;
+            }
+        }
+        return;
+    }
+
+    Escenario* e = (Escenario*)array_get(escenarios, indice + 1);
+
+    Rectangle btnAceptar = { 200, 360, 180, 40 };
+    Vector2 mouse;
+    bool aceptarPresionado = false;
+    bool salir = false;
+
+    while (!WindowShouldClose() && !salir) {
+        mouse = GetMousePosition();
 
         BeginDrawing();
             ClearBackground(RAYWHITE);
@@ -405,6 +491,10 @@ void cambiarEscenario(Mascota* mascota, Array* escenarios) {
             DrawRectangleLinesEx(btnAceptar, 1, GRAY);
             DrawText("Aceptar", btnAceptar.x + 50, btnAceptar.y + 10, 20, BLACK);
 
+            // Solo mostrar "Siguiente ->" si hay más escenarios
+            if (indice + 1 < total - 1) {
+                DrawText("Siguiente ->", 650, 250, 20, GRAY);
+            }
         EndDrawing();
 
         // Salir si se presiona BACKSPACE
@@ -426,17 +516,40 @@ void cambiarEscenario(Mascota* mascota, Array* escenarios) {
                 mascota->monedas -= e->req_monedas;
                 mascota->escenarioActual = e;
 
-                // Confirmar cambio
-                BeginDrawing();
-                    ClearBackground(RAYWHITE);
-                    DrawText(TextFormat("Escenario cambiado a: %s", e->nombreEscenario), 200, 280, 20, DARKGREEN);
-                EndDrawing();
-                return; // Salir de la función al cambiar de escenario
+                // Mostrar mensaje por 2 segundos
+                double start = GetTime();
+                while (GetTime() - start < 2.0 && !WindowShouldClose()) {
+                    BeginDrawing();
+                        ClearBackground(RAYWHITE);
+                        DrawText(TextFormat("Escenario cambiado a: %s", e->nombreEscenario), 200, 280, 20, Fade(DARKGREEN, 0.5f));
+                    EndDrawing();
+                }
+                salir = true;
             } else {
-                BeginDrawing();
-                    ClearBackground(RAYWHITE);
-                    DrawText("No cumples los requisitos para este escenario(monedas y/o energía insufucuentes).", 220, 280, 20, RED);
-                EndDrawing();
+                // Mostrar mensaje de requisitos insuficientes con botón y backspace
+                bool salirMsg = false;
+                Rectangle btnSalir = { 400, 350, 120, 40 };
+                while (!WindowShouldClose() && !salirMsg) {
+                    Vector2 mouseMsg = GetMousePosition();
+                    BeginDrawing();
+                        ClearBackground(RAYWHITE);
+                        DrawText("No cumples los requisitos para este escenario (monedas y/o energía insuficientes).", 220, 280, 20, RED);
+
+                        // Botón Salir
+                        bool hoverSalir = CheckCollisionPointRec(mouseMsg, btnSalir);
+                        DrawRectangleRec(btnSalir, hoverSalir ? SKYBLUE : LIGHTGRAY);
+                        DrawRectangleLinesEx(btnSalir, 2, GRAY);
+                        DrawText("Salir", btnSalir.x + 30, btnSalir.y + 10, 20, BLACK);
+
+                        int anchoTexto = MeasureText("Backspace para salir", 18);
+                        DrawText("Backspace para salir", GetScreenWidth() - anchoTexto - 20, 20, 18, GRAY);
+                    EndDrawing();
+
+                    if ((hoverSalir && IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) || IsKeyPressed(KEY_BACKSPACE)) {
+                        salirMsg = true;
+                    }
+                }
+                salir = true;
             }
         }
     }
