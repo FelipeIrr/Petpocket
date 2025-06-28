@@ -93,7 +93,7 @@ void juegoRitmico(Mascota* mascota) {
 
         if (IsKeyPressed(KEY_BACKSPACE)) {
             salir = true;
-            mascota->monedas += score/1;
+            mascota->monedas += score/1000;
             continue;
         }
 
