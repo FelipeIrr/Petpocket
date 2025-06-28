@@ -198,7 +198,10 @@ void tienda(Mascota* mascota) {
 
         // --- Dibujo con scroll ---
         int i = 0;
-        for (i ; i < total; i++) {
+        for (i = 0; i < total; i++) {
+            // Si es un aspecto y ya tienes al menos uno, no lo muestres
+            if (items[i]->tipo == ASPECTO && contadores[i] >= 1) continue;
+
             Rectangle btn = botones[i];
             btn.y -= scrollY;
             if (btn.y + btn.height < 80 || btn.y > GetScreenHeight() - 40) continue; // Fuera de la vista
@@ -541,11 +544,6 @@ void cambiarEscenario(Mascota* mascota, Array* escenarios) {
             DrawRectangleRec(btnAceptar, LIGHTGRAY);
             DrawRectangleLinesEx(btnAceptar, 1, GRAY);
             DrawText("Aceptar", btnAceptar.x + 50, btnAceptar.y + 10, 20, BLACK);
-
-            // Solo mostrar "Siguiente ->" si hay más escenarios
-            if (indice + 1 < total - 1) {
-                DrawText("Siguiente ->", 650, 250, 20, GRAY);
-            }
         EndDrawing();
 
         // Salir si se presiona BACKSPACE
@@ -788,6 +786,12 @@ void alimentarMascota(Mascota* mascota) {
         int anchoTitulo = MeasureText(titulo, 20);
         DrawText(titulo, (GetScreenWidth() - anchoTitulo) / 2, 50, 20, DARKGRAY);
 
+        // Mostrar energía actual
+        char energiaTxt[64];
+        snprintf(energiaTxt, sizeof(energiaTxt), "Energía actual: %d / 100", mascota->energia);
+        int anchoEnergia = MeasureText(energiaTxt, 20);
+        DrawText(energiaTxt, (GetScreenWidth() - anchoEnergia) / 2, 90, 20, DARKBLUE);
+
         // Mostrar todas las comidas en una fila
         int thumbSize = 100;
         int spacing = 30;
@@ -822,6 +826,12 @@ void alimentarMascota(Mascota* mascota) {
             snprintf(cantidadTxt, sizeof(cantidadTxt), "x%d", comidas[i].cantidad);
             int anchoCantidad = MeasureText(cantidadTxt, 16);
             DrawText(cantidadTxt, dest.x + (thumbSize - anchoCantidad) / 2, dest.y + thumbSize + 30, 16, DARKGREEN);
+
+            // Valor energético debajo de la cantidad
+            char valorEnergeticoTxt[32];
+            snprintf(valorEnergeticoTxt, sizeof(valorEnergeticoTxt), "+%d energía", comidas[i].item->valor_energetico);
+            int anchoValor = MeasureText(valorEnergeticoTxt, 16);
+            DrawText(valorEnergeticoTxt, dest.x + (thumbSize - anchoValor) / 2, dest.y + thumbSize + 50, 16, BLUE);
         }
 
         // Instrucción para salir
@@ -841,9 +851,27 @@ void alimentarMascota(Mascota* mascota) {
         // Confirmar selección
         if (IsKeyPressed(KEY_ENTER)) {
             if (total > 0 && seleccion >= 0 && seleccion < total && comidas[seleccion].cantidad > 0) {
+                // Si la energía ya está al máximo, no gastar comida ni sumar energía
+                if (mascota->energia >= 100) {
+                    // Mensaje: energía al máximo
+                    bool salirConfirm = false;
+                    while (!salirConfirm && !WindowShouldClose()) {
+                        BeginDrawing();
+                        ClearBackground(RAYWHITE);
+                        int anchoMsg = MeasureText("¡La energía ya está al máximo!", 20);
+                        DrawText("¡La energía ya está al máximo!", (GetScreenWidth() - anchoMsg) / 2, 300, 20, RED);
+                        int anchoSalir = MeasureText("Presiona BACKSPACE o ESC para salir", 18);
+                        DrawText("Presiona BACKSPACE o ESC para salir", (GetScreenWidth() - anchoSalir) / 2, 340, 18, GRAY);
+                        EndDrawing();
+
+                        if (IsKeyPressed(KEY_BACKSPACE) || IsKeyPressed(KEY_ESCAPE) || IsKeyPressed(KEY_ENTER))
+                            salirConfirm = true;
+                    }
+                    break;
+                }
+
                 // Alimentar: sumar energía y eliminar un item de ese tipo del inventario
                 mascota->energia += comidas[seleccion].item->valor_energetico;
-                // Limitar energía máxima si lo deseas, por ejemplo 100
                 if (mascota->energia > 100) mascota->energia = 100;
 
                 // Eliminar un item de ese tipo del inventario
@@ -877,4 +905,4 @@ void alimentarMascota(Mascota* mascota) {
     }
 
     free(comidas);
-}   
+}
