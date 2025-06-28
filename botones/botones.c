@@ -108,47 +108,6 @@ void mostrarTienda(Mascota* mascota, Escenario* escenario) {
             }
         }
     }
-<<<<<<< HEAD
-}
-
-// Función auxiliar para saber si un aspecto ya está en el inventario
-bool tieneAspecto(List* inventario, Item* aspecto) {
-    for (Item* it = list_first(inventario); it != NULL; it = list_next(inventario)) {
-        if (it->tipo == ASPECTO && strcmp(it->nombre, aspecto->nombre) == 0) {
-            return true;
-        }
-    }
-    return false;
-}
-
-// ACCESO A TIENDA
-void tienda(Mascota* mascota) {
-    Map* tienda = mascota->escenario_actual->tienda;
-    Pair* pares[100]; // máximo 100 ítems en tienda
-    int total = 0;
-
-    // Obtener todos los ítems en la tienda
-    for (Pair* par = firstMap(tienda); par != NULL; par = nextMap(tienda)) {
-        pares[total++] = par;
-    }
-
-    // Filtrar los ítems que se mostrarán (no mostrar aspectos ya comprados)
-    int visibles = 0;
-    Item* visiblesItems[100];
-    for (int i = 0; i < total; i++) {
-        Item* item = (Item*)pares[i]->value;
-        if (item->tipo == ASPECTO && tieneAspecto(mascota->inventario, item)) {
-            continue; // No mostrar si ya lo tiene
-        }
-        visiblesItems[visibles++] = item;
-    }
-
-    Rectangle botones[visibles];
-    for (int i = 0; i < visibles; i++) {
-        botones[i] = (Rectangle){ 100, 120 + i * 60, 800, 50 };
-    }
-=======
->>>>>>> aeeafe2a104f3864b084ff3da42a9621776a095d
 
     // Crear arreglo de botones para la selección visual
     Rectangle* botones = malloc(sizeof(Rectangle) * total);
@@ -188,13 +147,8 @@ void tienda(Mascota* mascota) {
         DrawText("--- TIENDA ---", 400, 40, 30, DARKBLUE);
         DrawText(TextFormat("Monedas: %d", mascota->monedas), 40, 40, 20, DARKGRAY);
 
-<<<<<<< HEAD
-        for (int i = 0; i < visibles; i++) {
-            Item* item = visiblesItems[i];
-=======
         // Mostrar contador de ítems cargados
         DrawText(TextFormat("Items cargados: %d", total), 20, 10, 20, DARKGREEN);
->>>>>>> aeeafe2a104f3864b084ff3da42a9621776a095d
 
         // --- Dibujo con scroll ---
         int i = 0;
@@ -245,11 +199,6 @@ void tienda(Mascota* mascota) {
         }
     }
 
-<<<<<<< HEAD
-    if (seleccion < 0 || seleccion >= visibles) return;
-
-    Item* item = visiblesItems[seleccion];
-=======
     // Si se salió sin seleccionar, limpiar y continuar (no return)
     if (seleccion < 0 || seleccion >= total || salir) {
         free(botones);
@@ -280,7 +229,6 @@ void tienda(Mascota* mascota) {
 
         while (!salirMensaje && !WindowShouldClose()) {
             Vector2 mouse = GetMousePosition();
->>>>>>> aeeafe2a104f3864b084ff3da42a9621776a095d
 
             BeginDrawing();
             ClearBackground(RAYWHITE);
