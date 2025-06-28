@@ -136,8 +136,9 @@ Los pasos son solo en modo de ejemplo, el usaruio podra escojer cualquier boton 
  ●Jorge Plaza
   ○ TDAs
   ○ Investigación
-  ○ Propuestas
+  ○ Propuesta de diseño
   ○ Diseño y redacción del README
+  ○ Organización del código
 ◟                                                                                                                                ◞
 
 
